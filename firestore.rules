@@ -1,19 +1,7 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * CORE PHILOSOPHY
-     * This ruleset enforces a strict user-ownership model for personal data while providing 
-     * shared access to educational curriculum content. The security posture is "private-by-default," 
-     * where users can only access data explicitly associated with their unique identifier.
-     *
-     * DATA STRUCTURE
-     * - /users/{userId}: Private user profiles and roots for user-specific data.
-     * - /modules/{moduleId}: Global educational modules.
-     * - /users/{userId}/drafts/{draftId}: Private strategic content.
-     * - /users/{userId}/progress/{progressId}: Private tracking of learning milestones.
-     */
 
     // --- Helper Functions ---
 
@@ -23,6 +11,11 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // --- Collection Rules ---
@@ -40,12 +33,13 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for interactive learning modules. 
-     * Catalog is publicly readable and writable for this prototype phase to allow 
-     * immediate curriculum testing and deployment by administrators.
+     * @description Curriculum catalog rules.
+     * Publicly readable by all authenticated users.
+     * Only writable by administrative accounts.
      */
     match /modules/{moduleId} {
-      allow read, write: if true;
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
   }
 }

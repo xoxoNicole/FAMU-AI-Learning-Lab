@@ -7,13 +7,22 @@ import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PlayCircle, Clock, BookOpen, Star, Plus } from 'lucide-react';
-import { useFirestore, useCollection, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { PlayCircle, Clock, BookOpen, Star, Plus, Loader2 } from 'lucide-react';
+import { useFirestore, useCollection, useUser, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 
 export default function ModulesListing() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
+
+  // Fetch the current user profile to check for the 'admin' role
+  const userProfileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: userProfile } = useDoc(userProfileRef);
+  const isAdmin = userProfile?.role === 'admin';
 
   const modulesQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -22,13 +31,18 @@ export default function ModulesListing() {
 
   const { data: modules, isLoading } = useCollection(modulesQuery);
 
-  // Fallback for progress - in a real app, this would fetch from /users/{userId}/progress
+  // Fallback for progress
   const getProgress = (moduleId: string) => {
-    // Simulated progress for demo
-    if (moduleId === '1') return 100;
-    if (moduleId === '2') return 45;
-    return 0;
+    return 0; // Simplified for prototype
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-[#004B40]" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-12">
@@ -43,15 +57,17 @@ export default function ModulesListing() {
             <p className="text-xl text-muted-foreground mt-2 font-medium">Equipping academic leaders for the next era of administration.</p>
           </div>
           <div className="flex gap-4">
-            <Link href="/dashboard/curriculum-manager">
-              <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
-                <Plus className="w-4 h-4 mr-2" /> Manage Content
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href="/dashboard/curriculum-manager">
+                <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
+                  <Plus className="w-4 h-4 mr-2" /> Manage Content
+                </Button>
+              </Link>
+            )}
             <Card className="glass-card py-3 px-6 border-none flex items-center gap-4 shadow-xl">
               <div className="text-right">
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Earned Badges</p>
-                <p className="text-xl font-headline font-bold text-[#004B40]">3 / 12</p>
+                <p className="text-xl font-headline font-bold text-[#004B40]">0 / 12</p>
               </div>
               <Star className="w-8 h-8 text-[#FF671F] fill-[#FF671F]" />
             </Card>
@@ -77,6 +93,7 @@ export default function ModulesListing() {
                     alt={module.title} 
                     fill 
                     className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                    data-ai-hint="university campus"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute top-4 left-4">
@@ -126,11 +143,13 @@ export default function ModulesListing() {
             <BookOpen className="w-16 h-16 text-muted-foreground/20 mx-auto" />
             <h3 className="text-2xl font-headline font-bold text-[#004B40]">No Modules Available</h3>
             <p className="text-muted-foreground">The strategic curriculum is currently being initialized by the administration.</p>
-            <Link href="/dashboard/curriculum-manager">
-              <Button className="bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-bold rounded-xl mt-4">
-                Add First Module
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href="/dashboard/curriculum-manager">
+                <Button className="bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-bold rounded-xl mt-4">
+                  Add First Module
+                </Button>
+              </Link>
+            )}
           </div>
         </Card>
       )}

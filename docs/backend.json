@@ -10,7 +10,8 @@
         "email": { "type": "string", "format": "email" },
         "displayName": { "type": "string" },
         "title": { "type": "string", "description": "e.g., Dean, Professor" },
-        "department": { "type": "string" }
+        "department": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "faculty"], "default": "faculty" }
       },
       "required": ["uid", "email"]
     },
