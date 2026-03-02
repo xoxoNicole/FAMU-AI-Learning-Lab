@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -16,25 +16,54 @@ import {
   Download,
   Save,
   Loader2,
-  FileText
+  FileText,
+  Check
 } from 'lucide-react';
 import { generateStrategicContent } from '@/ai/flows/generate-strategic-content';
 import { challengeAssumptionsAndFeedback } from '@/ai/flows/challenge-assumptions-and-feedback';
 import { refineContentWithAI } from '@/ai/flows/refine-content-with-ai';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useSearchParams } from 'next/navigation';
 
 export function NicoleChat() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [tone, setTone] = useState([50]); // 0: Academic, 100: Visionary
   const [feedback, setFeedback] = useState<any>(null);
+  
   const { toast } = useToast();
+  const { user } = useUser();
+  const db = useFirestore();
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get('draftId');
+
+  // Load draft if ID is present
+  useEffect(() => {
+    async function loadDraft() {
+      if (draftId && db && user) {
+        const draftRef = doc(db, 'users', user.uid, 'drafts', draftId);
+        const snap = await getDoc(draftRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          setOutput(data.content);
+          setTone([data.tone || 50]);
+          setInput(data.title || '');
+        }
+      }
+    }
+    loadDraft();
+  }, [draftId, db, user]);
 
   const handleGenerate = async () => {
     if (!input.trim()) return;
     setLoading(true);
+    setSaveSuccess(false);
     try {
       const res = await generateStrategicContent({ request: input });
       setOutput(res.draft);
@@ -43,6 +72,40 @@ export function NicoleChat() {
       toast({ variant: "destructive", title: "Error", description: "Failed to generate content." });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!output || !db || !user) return;
+    setSaving(true);
+    try {
+      if (draftId) {
+        // Update existing
+        const draftRef = doc(db, 'users', user.uid, 'drafts', draftId);
+        await updateDoc(draftRef, {
+          content: output,
+          updatedAt: new Date().toISOString(),
+          tone: tone[0]
+        });
+      } else {
+        // Create new
+        const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Content";
+        await addDoc(collection(db, 'users', user.uid, 'drafts'), {
+          title: title,
+          content: output,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tone: tone[0],
+          type: "AI Draft"
+        });
+      }
+      setSaveSuccess(true);
+      toast({ title: "Saved", description: "Your work has been saved to My Drafts." });
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save draft." });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -103,7 +166,7 @@ export function NicoleChat() {
           <Card className="glass-card p-8 border-none shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="prose prose-blue max-w-none">
               <h4 className="font-headline font-bold text-primary mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" /> Generated Draft
+                <FileText className="w-5 h-5" /> {draftId ? 'Editing Draft' : 'Generated Draft'}
               </h4>
               <div className="text-foreground leading-relaxed whitespace-pre-wrap font-body">
                 {output}
@@ -114,11 +177,12 @@ export function NicoleChat() {
               <Button onClick={copyToClipboard} variant="outline" size="sm" className="rounded-lg h-9">
                 <Copy className="w-4 h-4 mr-2" /> Copy
               </Button>
-              <Button variant="outline" size="sm" className="rounded-lg h-9">
-                <Download className="w-4 h-4 mr-2" /> PDF
+              <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "outline"} size="sm" className="rounded-lg h-9 transition-all">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                {saveSuccess ? "Saved!" : "Save to My Drafts"}
               </Button>
               <Button variant="outline" size="sm" className="rounded-lg h-9">
-                <Save className="w-4 h-4 mr-2" /> Save Draft
+                <Download className="w-4 h-4 mr-2" /> PDF
               </Button>
             </div>
           </Card>
