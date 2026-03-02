@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -7,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
-import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, Sparkles } from 'lucide-react';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CurriculumManager() {
   const db = useFirestore();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   // Form State
@@ -34,34 +33,28 @@ export default function CurriculumManager() {
 
   const { data: modules } = useCollection(modulesQuery);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!db || !formData.title) return;
 
-    setLoading(true);
-    try {
-      await addDoc(collection(db, 'modules'), {
-        ...formData,
-        createdAt: new Date().toISOString()
-      });
-      toast({ title: "Module Created", description: `${formData.title} has been added to the catalog.` });
-      setFormData({ title: '', description: '', duration: '', category: '', thumbnail: '', videoUrl: '' });
-      setShowForm(false);
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to create module." });
-    } finally {
-      setLoading(false);
-    }
+    addDocumentNonBlocking(collection(db, 'modules'), {
+      ...formData,
+      createdAt: new Date().toISOString()
+    });
+    
+    toast({ 
+      title: "Module Request Sent", 
+      description: `${formData.title} is being deployed to the catalog.` 
+    });
+    
+    setFormData({ title: '', description: '', duration: '', category: '', thumbnail: '', videoUrl: '' });
+    setShowForm(false);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!db) return;
-    try {
-      await deleteDoc(doc(db, 'modules', id));
-      toast({ title: "Module Deleted" });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete module." });
-    }
+    deleteDocumentNonBlocking(doc(db, 'modules', id));
+    toast({ title: "Module Deletion Initiated" });
   };
 
   return (
@@ -84,7 +77,7 @@ export default function CurriculumManager() {
         <Card className="glass-card border-none shadow-2xl rounded-[2.5rem] animate-in slide-in-from-top-4 duration-500 overflow-hidden">
           <div className="h-2 bg-[#FF671F]" />
           <CardHeader>
-            <CardTitle className="text-2xl font-headline text-[#004B40]">Module Configuration</izarCardTitle>
+            <CardTitle className="text-2xl font-headline text-[#004B40]">Module Configuration</CardTitle>
             <CardDescription>Enter the details for the new strategic learning unit.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -152,8 +145,8 @@ export default function CurriculumManager() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="submit" disabled={loading} className="h-14 px-10 rounded-2xl bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-headline font-bold shadow-xl">
-                  {loading ? 'Deploying...' : 'Deploy Module to Catalog'}
+                <Button type="submit" className="h-14 px-10 rounded-2xl bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-headline font-bold shadow-xl">
+                  Deploy Module to Catalog
                 </Button>
               </div>
             </form>
