@@ -29,6 +29,20 @@
       },
       "required": ["title", "content", "createdAt"]
     },
+    "Module": {
+      "title": "Educational Module",
+      "description": "A curriculum unit available to all users.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "duration": { "type": "string" },
+        "category": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "videoUrl": { "type": "string" }
+      }
+    },
     "ModuleProgress": {
       "title": "Module Progress",
       "description": "Tracking completion of learning modules.",
@@ -56,6 +70,10 @@
     "/users/{userId}/progress/{moduleId}": {
       "schema": "#/backend/entities/ModuleProgress",
       "description": "Tracking progress for specific modules."
+    },
+    "/modules/{moduleId}": {
+      "schema": "#/backend/entities/Module",
+      "description": "Global curriculum content managed by admins."
     }
   }
 }
