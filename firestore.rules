@@ -13,11 +13,6 @@ service cloud.firestore {
      * - /modules/{moduleId}: Global educational modules.
      * - /users/{userId}/drafts/{draftId}: Private strategic content.
      * - /users/{userId}/progress/{progressId}: Private tracking of learning milestones.
-     *
-     * KEY SECURITY DECISIONS
-     * - Authentication: Private data access requires a verified identity.
-     * - Public Access: The curriculum catalog (/modules) is publicly readable to allow browsing.
-     * - Ownership: User-specific documents are validated against the URL path and auth token.
      */
 
     // --- Helper Functions ---
@@ -28,10 +23,6 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
     }
 
     // --- Collection Rules ---
@@ -50,14 +41,14 @@ service cloud.firestore {
 
     /**
      * @description Rules for interactive learning modules. 
-     * Catalog is publicly readable. Management requires authentication.
+     * Catalog is publicly readable to allow faculty to browse before/during login.
+     * Management requires authentication.
      */
     match /modules/{moduleId} {
       // Allow anyone to see the course catalog
       allow get, list: if true;
       
       // Allow signed-in users to manage modules for this prototype
-      // In a production system, this would be restricted to admin UIDs
       allow create, update, delete: if isSignedIn();
     }
   }
