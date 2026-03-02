@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -5,10 +6,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X } from 'lucide-react';
+import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CurriculumManager() {
@@ -23,7 +25,9 @@ export default function CurriculumManager() {
     duration: '',
     category: '',
     thumbnail: '',
-    videoUrl: ''
+    videoUrl: '',
+    labTask: '',
+    difficulty: 'Foundational'
   });
 
   const modulesQuery = useMemoFirebase(() => {
@@ -35,7 +39,7 @@ export default function CurriculumManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!db || !formData.title) return;
+    if (!db || !formData.title || !formData.labTask) return;
 
     addDocumentNonBlocking(collection(db, 'modules'), {
       ...formData,
@@ -43,11 +47,20 @@ export default function CurriculumManager() {
     });
     
     toast({ 
-      title: "Module Deployment Started", 
-      description: `${formData.title} is being synchronized with the global catalog.` 
+      title: "Module Deployed", 
+      description: `${formData.title} is now live in the course catalog.` 
     });
     
-    setFormData({ title: '', description: '', duration: '', category: '', thumbnail: '', videoUrl: '' });
+    setFormData({ 
+      title: '', 
+      description: '', 
+      duration: '', 
+      category: '', 
+      thumbnail: '', 
+      videoUrl: '', 
+      labTask: '',
+      difficulty: 'Foundational' 
+    });
     setShowForm(false);
   };
 
@@ -81,7 +94,7 @@ export default function CurriculumManager() {
           <div className="h-2 bg-[#FF671F]" />
           <CardHeader>
             <CardTitle className="text-2xl font-headline text-[#004B40]">Unit Configuration</CardTitle>
-            <CardDescription>Configure the metadata for this institutional learning module.</CardDescription>
+            <CardDescription>Configure the metadata and AI Lab task for this institutional learning module.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -97,6 +110,49 @@ export default function CurriculumManager() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Difficulty Tier</label>
+                  <Select 
+                    value={formData.difficulty} 
+                    onValueChange={val => setFormData({...formData, difficulty: val})}
+                  >
+                    <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-none focus:ring-[#FF671F]">
+                      <SelectValue placeholder="Select Tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Foundational">Foundational</SelectItem>
+                      <SelectItem value="Intermediate">Intermediate</SelectItem>
+                      <SelectItem value="Advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Module Description</label>
+                <Textarea 
+                  value={formData.description} 
+                  onChange={e => setFormData({...formData, description: e.target.value})}
+                  placeholder="What will faculty master in this unit?"
+                  className="rounded-xl bg-muted/30 border-none h-24 focus-visible:ring-[#FF671F]"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2 bg-[#004B40]/5 p-6 rounded-2xl border border-[#004B40]/10">
+                <label className="text-[10px] font-bold uppercase text-[#004B40] tracking-widest flex items-center gap-2">
+                  <Zap className="w-3 h-3 text-[#FF671F]" /> AI Lab Active Task
+                </label>
+                <Textarea 
+                  value={formData.labTask} 
+                  onChange={e => setFormData({...formData, labTask: e.target.value})}
+                  placeholder="Describe the specific prompt or task the user should complete in the AI sidebar."
+                  className="rounded-xl bg-white border-none h-24 focus-visible:ring-[#FF671F]"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Strategic Category</label>
                   <Input 
                     value={formData.category} 
@@ -105,19 +161,6 @@ export default function CurriculumManager() {
                     className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
                   />
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Objective & Description</label>
-                <Textarea 
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  placeholder="What will faculty master in this unit?"
-                  className="rounded-xl bg-muted/30 border-none h-32 focus-visible:ring-[#FF671F]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Duration</label>
                   <Input 
@@ -128,20 +171,11 @@ export default function CurriculumManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Visual Assets (URL)</label>
-                  <Input 
-                    value={formData.thumbnail} 
-                    onChange={e => setFormData({...formData, thumbnail: e.target.value})}
-                    placeholder="Cover image URL"
-                    className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
-                  />
-                </div>
-                <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Resource Link (Video)</label>
                   <Input 
                     value={formData.videoUrl} 
                     onChange={e => setFormData({...formData, videoUrl: e.target.value})}
-                    placeholder="Video/Interactive URL"
+                    placeholder="YouTube or Vimeo URL"
                     className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
                   />
                 </div>
@@ -149,7 +183,7 @@ export default function CurriculumManager() {
 
               <div className="flex justify-end gap-3 pt-4 border-t border-muted">
                 <Button type="submit" className="h-14 px-10 rounded-2xl bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-headline font-bold shadow-xl shadow-orange-900/20">
-                  Deploy to Course Catalog
+                  Deploy to Catalog
                 </Button>
               </div>
             </form>
@@ -171,25 +205,20 @@ export default function CurriculumManager() {
             {modules.map(module => (
               <Card key={module.id} className="border-none bg-white hover:shadow-xl transition-all group overflow-hidden shadow-sm">
                 <div className="flex items-center p-6 gap-6">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-muted border border-muted">
-                    {module.thumbnail ? (
-                      <img src={module.thumbnail} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#004B40]/5">
-                        <BookOpen className="w-8 h-8 text-[#004B40]/20" />
-                      </div>
-                    )}
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-[#004B40]/5 border border-muted flex items-center justify-center">
+                    <BookOpen className="w-8 h-8 text-[#004B40]/20" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <h4 className="text-xl font-headline font-bold text-[#004B40] truncate">{module.title}</h4>
                       <span className="px-2 py-0.5 rounded-full bg-[#FF671F]/10 text-[#FF671F] text-[9px] font-bold uppercase tracking-widest">
-                        {module.category || 'Standard'}
+                        {module.difficulty || 'Foundational'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground mt-2 uppercase tracking-widest">
+                    <p className="text-sm text-muted-foreground truncate font-medium mt-1">{module.description}</p>
+                    <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground mt-3 uppercase tracking-widest">
                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#FF671F]" /> {module.duration || 'N/A'}</span>
-                      <span className="flex items-center gap-1.5"><Video className="w-3.5 h-3.5 text-[#FF671F]" /> Resources Linked</span>
+                      <span className="flex items-center gap-1.5"><Video className="w-3.5 h-3.5 text-[#FF671F]" /> {module.videoUrl ? 'Video Connected' : 'No Resource'}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">

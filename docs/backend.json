@@ -40,8 +40,11 @@
         "duration": { "type": "string" },
         "category": { "type": "string" },
         "thumbnail": { "type": "string" },
-        "videoUrl": { "type": "string" }
-      }
+        "videoUrl": { "type": "string" },
+        "labTask": { "type": "string", "description": "The specific instruction for the AI Lab during this module." },
+        "difficulty": { "type": "string", "enum": ["Foundational", "Intermediate", "Advanced"] }
+      },
+      "required": ["title", "description", "labTask"]
     },
     "ModuleProgress": {
       "title": "Module Progress",

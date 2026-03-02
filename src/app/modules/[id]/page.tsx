@@ -1,11 +1,11 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NicoleChat } from '@/components/strategist/NicoleChat';
-import { ChevronLeft, Play, Maximize2, CheckCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, Play, CheckCircle, Loader2, Sparkles, BookOpen } from 'lucide-react';
 import { useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
@@ -49,7 +49,10 @@ export default function ModulePage() {
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div>
-            <span className="text-xs font-bold text-[#FF671F] uppercase tracking-widest">Active Session</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-widest">Module Session</span>
+              <span className="bg-[#004B40]/10 text-[#004B40] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">{module.difficulty}</span>
+            </div>
             <h1 className="font-headline font-bold text-[#004B40] leading-none">{module.title}</h1>
           </div>
         </div>
@@ -88,7 +91,10 @@ export default function ModulePage() {
             </div>
 
             <div className="space-y-6">
-              <h2 className="text-3xl font-headline font-bold text-[#004B40]">{module.title}</h2>
+              <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-[0.2em] text-[10px]">
+                <BookOpen className="w-3.5 h-3.5" /> Unit Intelligence
+              </div>
+              <h2 className="text-4xl font-headline font-bold text-[#004B40] tracking-tight">{module.title}</h2>
               <div className="prose prose-green text-lg leading-relaxed text-muted-foreground font-medium">
                 {module.description}
               </div>
@@ -98,8 +104,8 @@ export default function ModulePage() {
                 <h4 className="font-bold text-[#004B40] mb-3 flex items-center gap-2 uppercase tracking-widest text-xs">
                   <Sparkles className="w-4 h-4 text-[#FF671F]" /> Active Lab Task
                 </h4>
-                <p className="text-primary/80 italic font-medium">
-                  "Use the AI Lab on the right to draft a preliminary brief for this module's topic. Aim for a professional, academic tone."
+                <p className="text-primary/90 font-medium leading-relaxed italic">
+                  "{module.labTask || 'Use the AI Lab on the right to draft a strategic brief for this module.'}"
                 </p>
               </div>
             </div>
