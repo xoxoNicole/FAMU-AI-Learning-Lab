@@ -18,7 +18,6 @@ export default function CurriculumManager() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
 
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     description: '',
