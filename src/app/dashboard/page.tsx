@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, PlayCircle, Clock, BookCheck, FileText, ArrowRight, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useFirestore, useUser, useCollection } from '@/firebase';
+import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { format } from 'date-fns';
 
@@ -43,7 +43,7 @@ export default function Dashboard() {
   const { user } = useUser();
   const db = useFirestore();
 
-  const recentDraftsQuery = React.useMemo(() => {
+  const recentDraftsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
       collection(db, 'users', user.uid, 'drafts'),
@@ -52,7 +52,7 @@ export default function Dashboard() {
     );
   }, [db, user]);
 
-  const { data: recentDrafts, loading: draftsLoading } = useCollection(recentDraftsQuery);
+  const { data: recentDrafts, isLoading: draftsLoading } = useCollection(recentDraftsQuery);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
@@ -84,6 +84,7 @@ export default function Dashboard() {
             alt="Hero"
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
+            data-ai-hint="university campus"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#004B40] via-[#004B40]/40 to-transparent" />
           <div className="absolute inset-0 p-12 flex flex-col justify-end text-white">
@@ -92,9 +93,9 @@ export default function Dashboard() {
             <p className="text-white/80 max-w-sm font-medium mb-8">
               Bypass the blank page. Use the lab to draft a comprehensive institutional plan for your department.
             </p>
-            <Link href="/modules/2">
+            <Link href="/modules">
               <Button className="h-14 px-10 bg-white text-[#004B40] hover:bg-white/90 rounded-2xl font-headline font-bold shadow-2xl">
-                Continue Module 2
+                Start Learning
               </Button>
             </Link>
           </div>
@@ -120,7 +121,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2 mt-2">
                       <Clock className="w-3 h-3 text-muted-foreground" />
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {format(new Date(draft.updatedAt), 'MMM d • h:mm a')}
+                        {draft.updatedAt ? format(new Date(draft.updatedAt), 'MMM d • h:mm a') : 'Recent'}
                       </p>
                     </div>
                   </div>
@@ -171,7 +172,7 @@ export default function Dashboard() {
                     </div>
                     <Progress value={module.progress} className="h-2 bg-muted rounded-full" />
                   </div>
-                  <Link href={`/modules/${module.id}`} className="block">
+                  <Link href={`/modules`} className="block">
                     <Button className="w-full h-12 bg-[#004B40] hover:bg-[#004B40]/90 text-white font-bold rounded-2xl shadow-lg transition-all group-hover:shadow-green-900/20">
                       <PlayCircle className="w-4 h-4 mr-2" />
                       {module.progress === 100 ? 'Review Module' : 'Resume Lab'}

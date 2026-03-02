@@ -35,7 +35,7 @@ service cloud.firestore {
 
     /**
      * @description Curriculum catalog rules.
-     * Publicly readable by all users so the catalog is visible.
+     * Publicly readable by all users so the catalog is visible even if logged out.
      * Only writable by administrative accounts.
      */
     match /modules/{moduleId} {
