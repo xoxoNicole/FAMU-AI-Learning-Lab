@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CORE PHILOSOPHY
+     * This ruleset enforces a strict user-ownership model for personal data while providing 
+     * shared access to educational curriculum content. The security posture is "private-by-default," 
+     * where users can only access data explicitly associated with their unique identifier.
+     *
+     * DATA STRUCTURE
+     * - /users/{userId}: Private user profiles and roots for user-specific data.
+     * - /modules/{moduleId}: Global, read-only educational modules.
+     * - /users/{userId}/outputs/{outputId}: Private AI-generated strategic content.
+     * - /users/{userId}/moduleProgress/{progressId}: Private tracking of learning milestones.
+     *
+     * KEY SECURITY DECISIONS
+     * - Authentication: All data access (except potentially system-level modules) requires a verified identity.
+     * - Ownership: Every user-specific document contains a denormalized 'userId' field that is validated 
+     *   against the URL path and the user's authentication token to ensure authorization independence.
+     * - Immutability: Relational fields (like userId) are made immutable after creation to prevent 
+     *   document "hijacking" or accidental reassignment.
+     * - Prototyping Flexibility: While ownership is strictly enforced, the specific shape and types 
+     *   of content fields (titles, descriptions, settings) are not validated to allow for rapid iteration.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's ID matches the provided ID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the user owns the existing document and it exists. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for individual user profiles. Users can only manage their own profile.
+     * @path /users/{userId}
+     * @allow (create) if auth.uid == "user123" and path is /users/user123
+     * @deny (read) if auth.uid == "userABC" but path is /users/userXYZ
+     * @principle Ownership and Self-Creation.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for AI-generated outputs. Private to the user who created them.
+       * @path /users/{userId}/outputs/{outputId}
+       * @allow (create) if auth.uid matches path {userId} and data.userId matches {userId}
+       * @deny (update) if attempting to change the userId field.
+       * @principle Relational Integrity and Ownership.
+       */
+      match /outputs/{outputId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Rules for tracking module completion. Private to the user.
+       * @path /users/{userId}/moduleProgress/{progressId}
+       * @allow (list) if auth.uid matches the path's {userId}.
+       * @deny (create) if the internal userId field doesn't match the path.
+       * @principle Path-based authorization and ownership.
+       */
+      match /moduleProgress/{progressId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    /**
+     * @description Rules for interactive learning modules. Publicly readable by all users.
+     * @path /modules/{moduleId}
+     * @allow (get) if any authenticated user.
+     * @deny (write) if any user (managed by admins or system).
+     * @principle Global Read with System-Only Writes.
+     */
+    match /modules/{moduleId} {
+      allow get, list: if isSignedIn();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

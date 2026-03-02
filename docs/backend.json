@@ -1,0 +1,284 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a faculty user of The Nicole Interface, linked to an external authentication system. Stores basic profile information necessary for application functionality.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity. This ID is typically provided by the external authentication system (e.g., Firebase Auth UUID)."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user, primarily used for identification and internal application purposes.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name, typically retrieved from the authentication provider."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user's profile was first created in the application.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time the user's profile information was updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Module": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Module",
+      "type": "object",
+      "description": "Represents an interactive AI learning module within the structured curriculum. Each module features a video introduction and application opportunities with the AI agent.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Module entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The main title of the learning module, clearly outlining its focus."
+        },
+        "description": {
+          "type": "string",
+          "description": "A concise summary of the module's content, learning objectives, and benefits."
+        },
+        "videoUrl": {
+          "type": "string",
+          "description": "The URL to the module's high-quality video introduction, typically hosted on a platform like Vimeo.",
+          "format": "uri"
+        },
+        "order": {
+          "type": "number",
+          "description": "The sequential order of this module within the overall curriculum, dictating its position in the learning path."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this module was added to the curriculum.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time the module's details were updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "videoUrl",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Output": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Output",
+      "type": "object",
+      "description": "Represents a high-leverage output (e.g., strategic memo, grant proposal) generated or refined by a user using the Digital Nicole AI Strategist within a module context. These can be saved as drafts.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Output entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who generated or refined this output. (Relationship: User 1:N Output)"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module within which this output was generated. (Relationship: Module 1:N Output)"
+        },
+        "title": {
+          "type": "string",
+          "description": "A user-defined or AI-suggested title for the generated output, for easy identification."
+        },
+        "content": {
+          "type": "string",
+          "description": "The main body of the AI-generated or refined text content."
+        },
+        "type": {
+          "type": "string",
+          "description": "The category or format of the output, such as 'Strategic Memo', 'Grant Proposal', 'Lesson Plan', or 'Communication Draft'."
+        },
+        "toneSettings": {
+          "type": "string",
+          "description": "A string representing the 'Tone Slider' settings or other tone parameters applied during content generation."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the output within the user's workflow (e.g., 'draft', 'final', 'archived')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this output was first created or generated.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time this output was saved, updated, or refined.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "moduleId",
+        "title",
+        "content",
+        "type",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserModuleProgress": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserModuleProgress",
+      "type": "object",
+      "description": "Tracks a specific user's progress through a particular learning module, including completion status and last access time.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserModuleProgress entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User whose progress is being tracked. (Relationship: User 1:N UserModuleProgress)"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module for which progress is being tracked. (Relationship: Module 1:N UserModuleProgress)"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current completion status of the module for the user (e.g., 'notStarted', 'inProgress', 'completed')."
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time the user accessed or actively engaged with this module.",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user officially marked or achieved completion of the module.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this progress record was initially created (e.g., when the user first started or was assigned the module).",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time this progress record was updated (e.g., status change, last access time update).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "moduleId",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profiles. Access is private, allowing users to manage their own profile data. The document ID matches the Firebase Authentication UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User, typically matching the Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/modules/{moduleId}",
+        "definition": {
+          "entityName": "Module",
+          "schema": {
+            "$ref": "#/backend/entities/Module"
+          },
+          "description": "Stores definitions for all interactive AI learning modules. This collection is globally readable by all authenticated users. Modules are assumed to be managed by administrators or via background processes.",
+          "params": [
+            {
+              "name": "moduleId",
+              "description": "The unique identifier for the learning module."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/outputs/{outputId}",
+        "definition": {
+          "entityName": "Output",
+          "schema": {
+            "$ref": "#/backend/entities/Output"
+          },
+          "description": "Stores high-leverage outputs generated or refined by a user within a module context. Access is private, limited to the owning user. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this output."
+            },
+            {
+              "name": "outputId",
+              "description": "The unique identifier for the specific output document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/moduleProgress/{userModuleProgressId}",
+        "definition": {
+          "entityName": "UserModuleProgress",
+          "schema": {
+            "$ref": "#/backend/entities/UserModuleProgress"
+          },
+          "description": "Tracks a specific user's progress through a particular learning module. Access is private, limited to the owning user. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User whose module progress is being tracked."
+            },
+            {
+              "name": "userModuleProgressId",
+              "description": "The unique identifier for the specific user module progress record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to be secure, scalable, and debuggable, adhering strictly to the core design principles and mandates. \n\n**Authorization Independence via Denormalization:**\n- For user-specific data like `Output` documents and `UserModuleProgress` records, a hierarchical path structure `/users/{userId}/outputs/{outputId}` and `/users/{userId}/moduleProgress/{userModuleProgressId}` is adopted. \n- A critical aspect for Authorization Independence is that the `userId` field within the `Output` and `UserModuleProgress` documents explicitly stores the `userId` of the owner. This denormalization means that security rules can verify ownership by simply comparing `request.auth.uid` with the `{userId}` wildcard in the path and with `resource.data.userId` in the document itself, without requiring any expensive or complex `get()` operations on parent documents. This ensures atomic operations and simplified rule logic.\n- The `Module` collection `/modules/{moduleId}` is designed for global read access by all authenticated users. Since authorization is not user-specific (beyond authentication status), no denormalization for authorization context is required here.\n\n**QAPs (Query, Access, and Permissions) for Secure List Operations:**\n- **`/users/{userId}/outputs`**: This subcollection allows users to list *only their own* generated outputs. Security rules can enforce that `request.auth.uid` matches the `{userId}` in the path, making it impossible for a user to query or list outputs belonging to another user. The `userId` field within each `Output` document provides an additional, redundant check for robust security.\n- **`/users/{userId}/moduleProgress`**: Similarly, this subcollection ensures users can list *only their own* module progress records. The same rule logic (`request.auth.uid == userId`) applies, guaranteeing secure and efficient listing for individual progress tracking.\n- **`/modules`**: All authenticated users can securely list all available learning modules, as these are considered public read-only content. The simple rule `allow read: if request.auth != null;` is sufficient here, enabling QAPs for global module access.\n\n**Structural Segregation & Access Modeling:**\n- **Private Data:** User profiles (`/users/{userId}`), outputs (`/users/{userId}/outputs`), and module progress (`/users/{userId}/moduleProgress`) are all segregated under their respective user paths, ensuring a homogenous security posture where only the authenticated user can read/write their own data.\n- **Global Read Data:** `Modules` (`/modules/{moduleId}`) are in a top-level collection, clearly delineating them as shared, read-only content for all authenticated users.\n- This design minimizes complexity in security rules, moving authorization logic from conditional statements to structural organization."
+  }
+}
