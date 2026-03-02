@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "module-1",
+      "description": "AI Strategy for Administrators",
+      "imageUrl": "https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlJTIwc3RyYXRlZ3l8ZW58MHx8fHwxNzcyNDc2MTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artificial intelligence strategy"
+    },
+    {
+      "id": "module-2",
+      "description": "Grant Proposal Drafting",
+      "imageUrl": "https://images.unsplash.com/photo-1542948330-efbf302472dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d3JpdGluZyUyMHByb3Bvc2FsfGVufDB8fHx8MTc3MjQ3NjEwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "writing proposal"
+    },
+    {
+      "id": "module-3",
+      "description": "Effective Communication",
+      "imageUrl": "https://images.unsplash.com/photo-1746716809115-814c45fa1e92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb21tdW5pY2F0aW9uJTIwbmV0d29ya2luZ3xlbnwwfHx8fDE3NzI0NzYxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "communication networking"
+    },
+    {
+      "id": "login-bg",
+      "description": "FAMU Campus View",
+      "imageUrl": "https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx1bml2ZXJzaXR5JTIwY2FtcHVzfGVufDB8fHx8MTc3MjM3NTc1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "university campus"
+    }
+  ]
 }

@@ -1,0 +1,26 @@
+# **App Name**: The Nicole Interface
+
+## Core Features:
+
+- Secure User Authentication: Faculty log in securely using either Google Sign-In (preferred for FAMU Workspace) or an email/password fallback, ensuring a private and exclusive lab experience tailored for college administrators.
+- Interactive AI Learning Modules: A clean, engaging dashboard provides access to a structured curriculum of modules. Each module features a high-quality, strategy-focused video introduction (hosted on Vimeo) followed by immediate, intuitive application opportunities within the AI agent, moving beyond traditional LMS design.
+- Digital Nicole AI Strategist: An AI-powered tool, utilizing Vertex AI (Gemini Flash) and curated knowledge PDFs, acts as a personal strategist and mentor. This tool guides users through drafting, iterative refinement, structured feedback, and template production, always aligned with a defined tone and frameworks, creating an intuitive and exciting learning journey.
+- Dynamic Content Generation & Refinement: Users can generate and refine various high-leverage outputs, such as strategic memos, grant proposals, lesson plans, and communication drafts. This includes specialized AI tools like a 'Tone Slider' and a 'Challenge My Assumptions' button, which employs reasoning to offer strategic improvements and challenge user thinking, making the experience both powerful and fun.
+- Output Management and Export: Facilitates a seamless and 'no friction' workflow with options to copy AI-generated text, download output as PDF, or save drafts within the application, ensuring ease of use for busy administrators.
+- Module Progress Tracking: The application tracks user progress through the learning modules and associated activities, powered by Firestore to manage completion status and engagement, providing a clear overview of the learning journey.
+- Comprehensive Platform Security: Ensuring all user data, interactions, and intellectual property are protected with industry-standard encryption, access controls, and regular security audits, utilizing Firebase security rules and Google Cloud's robust infrastructure.
+
+## Style Guidelines:
+
+- A vibrant and modern light scheme, carefully curated to promote focus, clarity, and an engaging experience, embodying the Mogul School AI brand while distinctly moving away from conventional LMS aesthetics.
+- A sophisticated, deep blue (#1A5495) representing intelligence, professionalism, and technology, forming the core of the Mogul School AI brand and designed to contrast effectively with a light background for a beautiful appearance.
+- A very light, desaturated cool grey-blue (#E1E9EE), derived from the primary hue, providing a clean, understated, and beautiful canvas for content that feels expansive and inviting, not cluttered like a typical LMS.
+- A vibrant yet thoughtful purple (#7654DB), offering a clear distinction for calls-to-action and important highlights. This accent color symbolizes creativity and academic insight, adding a touch of fun and excitement to the Mogul School AI interface.
+- FAMU Green (#004B40) for background and main elements of the secure login dashboard, creating a custom, branded area that reflects FAMU's institutional identity for a familiar and trusted entry point.
+- FAMU Orange (#FF671F) for interactive elements and highlights on the login screen, complementing the FAMU branding and providing an engaging visual cue specific to the college.
+- 'Space Grotesk' (sans-serif) for a modern, techy, and direct feel that commands attention and contributes to an engaging, non-traditional learning environment, distinguishing it from typical academic interfaces.
+- 'Inter' (sans-serif) for excellent readability and a neutral, objective aesthetic, suitable for extensive content like strategy documents and lesson plans, ensuring clarity while maintaining a beautiful and contemporary look.
+- Utilize a consistent set of clean, minimalist line or geometric icons. The style should be modern, convey themes of AI, strategy, learning, and progress, supporting a 'glassmorphism-lite' aesthetic that is both beautiful and intuitively engaging, steering clear of conventional LMS iconography.
+- Adopt a 'clean, glassmorphism-lite' design with ample whitespace. The primary layout features an intuitive split-screen for video content and AI agent interaction, emphasizing 'no friction, no clutter' through clear hierarchy and navigation, creating an exciting and modern learning lab experience, not a bland LMS.
+- Implement a fully responsive design ensuring a consistent, beautiful, and functional user experience across all devices, from desktop monitors to mobile phones, without compromising accessibility or ease of use.
+- Incorporate subtle, purposeful, and fun animations for user feedback, such as engaging indicators for AI processing, smooth module transitions, and satisfying confirmations of saved drafts, to enhance user experience and delight without distraction, making the journey exciting.

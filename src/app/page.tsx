@@ -1,3 +1,7 @@
+
+import { redirect } from 'next/navigation';
+
 export default function Home() {
-  return <></>;
+  // In a real app, check auth state here
+  redirect('/login');
 }
