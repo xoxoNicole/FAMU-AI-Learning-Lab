@@ -5,7 +5,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PlayCircle, Clock, BookCheck, FileText, ArrowRight } from 'lucide-react';
+import { Sparkles, PlayCircle, Clock, BookCheck, FileText, ArrowRight, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useFirestore, useUser, useCollection } from '@/firebase';
@@ -15,25 +15,25 @@ import { format } from 'date-fns';
 const modules = [
   {
     id: '1',
-    title: 'AI Foundations for FAMU Faculty',
-    description: 'Learn how generative AI is reshaping higher education administration.',
-    image: 'https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlJTIwc3RyYXRlZ3l8ZW58MHx8fHwxNzcyNDc2MTAyfDA&ixlib=rb-4.1.0&q=80&w=1080',
+    title: 'AI Foundations',
+    description: 'Generative AI within the HBCU context.',
+    image: 'https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     progress: 100,
     time: '45 mins',
   },
   {
     id: '2',
-    title: 'Drafting Strategic Content',
-    description: 'Master the AI Literacy Lab tools to create high-leverage documents.',
-    image: 'https://images.unsplash.com/photo-1542948330-efbf302472dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d3JpdGluZyUyMHByb3Bvc2FsfGVufDB8fHx8MTc3MjQ3NjEwMnww&ixlib=rb-4.1.0&q=80&w=1080',
+    title: 'Strategic Drafting',
+    description: 'Master the tools for high-leverage documents.',
+    image: 'https://images.unsplash.com/photo-1542948330-efbf302472dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     progress: 45,
     time: '1.5 hours',
   },
   {
     id: '3',
-    title: 'Refinement & Iteration',
-    description: 'Learn the "Tone Slider" and "Challenge Assumptions" techniques.',
-    image: 'https://images.unsplash.com/photo-1746716809115-814c45fa1e92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb21tdW5pY2F0aW9uJTIwbmV0d29ya2luZ3xlbnwwfHx8fDE3NzI0NzYxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    title: 'Refinement Lab',
+    description: 'Learn advanced "Tone Slider" techniques.',
+    image: 'https://images.unsplash.com/photo-1746716809115-814c45fa1e92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     progress: 0,
     time: '1 hour',
   }
@@ -55,117 +55,126 @@ export default function Dashboard() {
   const { data: recentDrafts, loading: draftsLoading } = useCollection(recentDraftsQuery);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <header className="flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-headline font-bold text-primary">
-            Welcome, {user?.displayName || 'Faculty Member'}
+    <div className="p-8 max-w-7xl mx-auto space-y-10">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <p className="text-xs font-bold text-[#FF671F] uppercase tracking-[0.3em]">Administrator Dashboard</p>
+          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tighter">
+            Welcome, {user?.displayName?.split(' ')[0] || 'Rattler'}
           </h1>
-          <p className="text-muted-foreground mt-2 text-lg">Your strategic AI lab is ready. Let's build something powerful today.</p>
+          <p className="text-muted-foreground text-lg font-medium">Your strategic laboratory is initialized and ready for deployment.</p>
         </div>
-        <div className="flex gap-3">
-          <Card className="glass-card py-2 px-6 flex items-center gap-4">
+        <div className="flex gap-4">
+          <Card className="shadow-2xl shadow-green-900/5 border-none px-6 py-4 flex items-center gap-4 bg-white rounded-3xl">
             <div className="text-right">
-              <p className="text-xs text-muted-foreground uppercase font-bold">Overall Progress</p>
-              <p className="text-lg font-headline font-bold text-primary">48% Complete</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Efficiency Rating</p>
+              <p className="text-xl font-headline font-bold text-[#004B40]">A+</p>
             </div>
-            <BookCheck className="w-8 h-8 text-accent" />
+            <div className="w-10 h-10 rounded-2xl bg-[#FF671F]/10 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-[#FF671F]" />
+            </div>
           </Card>
         </div>
       </header>
 
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 glass-card overflow-hidden group border-none">
-          <div className="relative h-64 w-full">
-            <Image 
-              src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw8fHx1bml2ZXJzaXR5JTIwY2FtcHVzfGVufDB8fHx8MTc3MjM3NTc1OHww&ixlib=rb-4.1.0&q=80&w=1080"
-              alt="Hero"
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-8 text-white">
-              <span className="bg-accent px-3 py-1 rounded-full text-xs font-bold uppercase mb-4 inline-block">Recommended Next Step</span>
-              <h2 className="text-3xl font-headline font-bold mb-2">Module 2: Drafting Strategic Content</h2>
-              <p className="text-white/80 max-w-xl">
-                Ready to move beyond theory? Use the AI Literacy Lab to draft your next institutional memo.
-              </p>
-              <Link href="/modules/2">
-                <Button className="mt-6 h-12 px-8 bg-white text-primary hover:bg-white/90 rounded-xl font-headline">
-                  Resume Module
-                </Button>
-              </Link>
-            </div>
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-2 overflow-hidden border-none rounded-[2.5rem] shadow-2xl relative group h-[400px]">
+          <Image 
+            src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+            alt="Hero"
+            fill
+            className="object-cover transition-transform duration-1000 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#004B40] via-[#004B40]/40 to-transparent" />
+          <div className="absolute inset-0 p-12 flex flex-col justify-end text-white">
+            <span className="bg-[#FF671F] px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 w-fit shadow-xl">Deploy Next Initiative</span>
+            <h2 className="text-4xl font-headline font-bold mb-4 tracking-tight max-w-md">Drafting Strategic Memos for the Fall Term</h2>
+            <p className="text-white/80 max-w-sm font-medium mb-8">
+              Bypass the blank page. Use the lab to draft a comprehensive institutional plan for your department.
+            </p>
+            <Link href="/modules/2">
+              <Button className="h-14 px-10 bg-white text-[#004B40] hover:bg-white/90 rounded-2xl font-headline font-bold shadow-2xl">
+                Continue Module 2
+              </Button>
+            </Link>
           </div>
         </Card>
 
-        <Card className="glass-card flex flex-col p-6 border-none">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-headline font-bold text-primary flex items-center gap-2">
-              <FileText className="w-5 h-5 text-accent" /> Recent Drafts
+        <Card className="bg-white border-none rounded-[2.5rem] p-8 shadow-xl flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-headline font-bold text-[#004B40] flex items-center gap-3">
+              <FileText className="w-6 h-6 text-[#FF671F]" /> Recent Drafts
             </h3>
-            <Link href="/drafts" className="text-xs font-bold text-accent hover:underline flex items-center">
-              View All <ArrowRight className="w-3 h-3 ml-1" />
+            <Link href="/drafts" className="text-xs font-bold text-[#FF671F] hover:underline uppercase tracking-widest">
+              View All
             </Link>
           </div>
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-4">
             {draftsLoading ? (
-              <div className="text-sm text-muted-foreground italic p-4">Loading drafts...</div>
+              <div className="text-sm text-muted-foreground italic">Syncing with lab storage...</div>
             ) : recentDrafts && recentDrafts.length > 0 ? (
               recentDrafts.map(draft => (
                 <Link key={draft.id} href={`/strategist?draftId=${draft.id}`}>
-                  <div className="p-3 rounded-xl hover:bg-white/60 transition-colors border border-transparent hover:border-white/40 cursor-pointer">
-                    <p className="font-bold text-primary truncate text-sm">{draft.title}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {format(new Date(draft.updatedAt), 'MMM d, h:mm a')}
-                    </p>
+                  <div className="p-5 rounded-[1.5rem] bg-muted/40 hover:bg-[#004B40]/5 transition-all cursor-pointer border border-transparent hover:border-[#004B40]/10 group">
+                    <p className="font-bold text-[#004B40] truncate text-sm group-hover:text-[#FF671F] transition-colors">{draft.title}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {format(new Date(draft.updatedAt), 'MMM d • h:mm a')}
+                      </p>
+                    </div>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                <FileText className="w-8 h-8 text-muted-foreground/30 mb-2" />
-                <p className="text-sm text-muted-foreground">No drafts saved yet.</p>
-                <Link href="/strategist">
-                  <Button variant="link" className="text-accent text-xs p-0 h-auto mt-2">Open AI Lab</Button>
-                </Link>
+              <div className="h-full flex flex-col items-center justify-center text-center py-10">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">No active drafts</p>
+                <p className="text-xs text-muted-foreground px-6 leading-relaxed">Your strategic filing cabinet is empty. Start your first draft in the lab.</p>
               </div>
             )}
           </div>
+          <Link href="/strategist" className="mt-6">
+            <Button variant="outline" className="w-full h-12 rounded-2xl border-[#004B40]/10 text-[#004B40] font-bold">
+              <Sparkles className="w-4 h-4 mr-2 text-[#FF671F]" /> Open AI Lab
+            </Button>
+          </Link>
         </Card>
       </section>
 
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-headline font-bold text-primary">Learning Modules</h3>
-          <Link href="/modules" className="text-accent font-bold hover:underline">View All Modules</Link>
+      <section className="space-y-8">
+        <div className="flex items-center justify-between border-b border-muted pb-4">
+          <h3 className="text-3xl font-headline font-bold text-[#004B40]">Active Curriculum</h3>
+          <Link href="/modules" className="text-[#FF671F] font-bold uppercase tracking-widest text-xs hover:underline">Complete Catalog</Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {modules.map((module) => (
-            <Card key={module.id} className="glass-card hover:translate-y-[-4px] transition-all duration-300 border-none overflow-hidden group">
-              <div className="relative h-40 w-full overflow-hidden">
-                <Image src={module.image} alt={module.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute top-3 left-3 flex gap-2">
-                  <div className="bg-white/90 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold uppercase flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {module.time}
-                  </div>
+            <Card key={module.id} className="bg-white hover:translate-y-[-8px] transition-all duration-500 border-none rounded-[2rem] overflow-hidden group shadow-lg">
+              <div className="relative h-48 w-full overflow-hidden">
+                <Image src={module.image} alt={module.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-[#004B40] shadow-xl flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-[#FF671F]" /> {module.time}
                 </div>
               </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-headline">{module.title}</CardTitle>
-                <CardDescription className="line-clamp-2">{module.description}</CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-headline text-[#004B40] group-hover:text-[#FF671F] transition-colors">{module.title}</CardTitle>
+                <CardDescription className="font-medium">{module.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold text-muted-foreground uppercase">
-                    <span>Progress</span>
-                    <span>{module.progress}%</span>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                      <span>Mastery Progress</span>
+                      <span>{module.progress}%</span>
+                    </div>
+                    <Progress value={module.progress} className="h-2 bg-muted rounded-full" />
                   </div>
-                  <Progress value={module.progress} className="h-1.5" />
                   <Link href={`/modules/${module.id}`} className="block">
-                    <Button variant="outline" className="w-full border-primary/20 text-primary hover:bg-primary hover:text-white transition-all rounded-lg group-hover:bg-primary group-hover:text-white">
+                    <Button className="w-full h-12 bg-[#004B40] hover:bg-[#004B40]/90 text-white font-bold rounded-2xl shadow-lg transition-all group-hover:shadow-green-900/20">
                       <PlayCircle className="w-4 h-4 mr-2" />
-                      {module.progress === 100 ? 'Review' : module.progress > 0 ? 'Continue' : 'Start Module'}
+                      {module.progress === 100 ? 'Review Module' : 'Resume Lab'}
                     </Button>
                   </Link>
                 </div>

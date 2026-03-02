@@ -15,28 +15,32 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: BookOpen, label: 'Learning Modules', href: '/modules' },
-  { icon: Sparkles, label: 'AI Lab', href: '/strategist' },
+  { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
+  { icon: BookOpen, label: 'The Curriculum', href: '/modules' },
+  { icon: Sparkles, label: 'The Lab', href: '/strategist' },
   { icon: FileText, label: 'My Drafts', href: '/drafts' },
-  { icon: Target, label: 'Progress Tracking', href: '/progress' },
+  { icon: Target, label: 'Strategic Progress', href: '/progress' },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="w-64 h-full bg-white/40 backdrop-blur-xl border-r border-white/20 flex flex-col">
-      <div className="p-8">
-        <h1 className="text-xl font-headline font-bold text-primary flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+    <div className="w-72 h-full bg-white border-r border-muted flex flex-col shadow-sm">
+      <div className="p-8 pb-10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#004B40] flex items-center justify-center shadow-lg transform -rotate-3">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
-          AI Literacy Lab
-        </h1>
+          <div>
+            <span className="text-xl font-headline font-bold text-[#004B40] tracking-tighter block leading-none">AI Lab</span>
+            <span className="text-[9px] font-bold text-[#FF671F] uppercase tracking-[0.2em]">Florida A&M</span>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 px-4 space-y-1.5">
+        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Main Menu</p>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -44,23 +48,28 @@ export function Sidebar() {
               key={item.href} 
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
                 isActive 
-                  ? "bg-primary text-white shadow-lg" 
-                  : "text-muted-foreground hover:bg-white/60 hover:text-primary"
+                  ? "bg-[#004B40] text-white shadow-xl shadow-green-900/10" 
+                  : "text-muted-foreground hover:bg-muted hover:text-[#004B40]"
               )}
             >
-              <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover:text-primary")} />
-              <span className="font-medium">{item.label}</span>
+              <item.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-[#FF671F]" : "text-muted-foreground group-hover:text-[#004B40]")} />
+              <span className="font-bold text-sm">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/20">
-        <div className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive cursor-pointer transition-colors">
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Logout</span>
+      <div className="p-6">
+        <div className="p-4 rounded-3xl bg-muted/50 border border-muted space-y-3">
+          <p className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-wider">Session Security</p>
+          <div className="flex items-center gap-3 px-1 py-1 text-muted-foreground hover:text-destructive cursor-pointer transition-colors group">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-destructive/10">
+              <LogOut className="w-4 h-4" />
+            </div>
+            <span className="font-bold text-xs uppercase tracking-widest">Logout</span>
+          </div>
         </div>
       </div>
     </div>
