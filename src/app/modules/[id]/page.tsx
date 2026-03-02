@@ -6,7 +6,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NicoleChat } from '@/components/strategist/NicoleChat';
 import { ChevronLeft, Play, Maximize2, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
 
 export default function ModulePage() {
   const params = useParams();
@@ -64,10 +63,10 @@ export default function ModulePage() {
               <h2 className="text-3xl font-headline font-bold text-primary">Mastering the First Draft</h2>
               <div className="prose prose-blue text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  In this session, we explore the psychology of the "Blank Page" and how to use the Nicole AI Strategist as your primary brainstorming partner.
+                  In this session, we explore the psychology of the "Blank Page" and how to use the AI Literacy Lab as your primary brainstorming partner.
                 </p>
                 <p>
-                  Administrators often spend 80% of their time just getting the structure right. We're going to flip that. You'll use the lab on the right to prompt Nicole for a memo structure based on FAMU's current strategic plan.
+                  Administrators often spend 80% of their time just getting the structure right. We're going to flip that. You'll use the lab on the right to prompt the AI for a memo structure based on FAMU's current strategic plan.
                 </p>
               </div>
 
@@ -76,7 +75,7 @@ export default function ModulePage() {
                   <Maximize2 className="w-4 h-4" /> Lab Activity
                 </h4>
                 <p className="text-sm text-primary/80 italic">
-                  "Prompt Nicole with: 'Draft a three-paragraph memo about our new research initiative for the Fall 2024 semester. Use a collaborative and encouraging tone.'"
+                  "Prompt the AI with: 'Draft a three-paragraph memo about our new research initiative for the Fall 2024 semester. Use a collaborative and encouraging tone.'"
                 </p>
               </div>
             </div>

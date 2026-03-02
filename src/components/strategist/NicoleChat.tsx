@@ -15,12 +15,14 @@ import {
   Copy,
   Download,
   Save,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react';
 import { generateStrategicContent } from '@/ai/flows/generate-strategic-content';
 import { challengeAssumptionsAndFeedback } from '@/ai/flows/challenge-assumptions-and-feedback';
 import { refineContentWithAI } from '@/ai/flows/refine-content-with-ai';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export function NicoleChat() {
   const [input, setInput] = useState('');
@@ -50,7 +52,7 @@ export function NicoleChat() {
     try {
       const res = await challengeAssumptionsAndFeedback({ draftedContent: output });
       setFeedback(res);
-      toast({ title: "Analysis Complete", description: "Nicole has identified areas for improvement." });
+      toast({ title: "Analysis Complete", description: "The AI has identified areas for improvement." });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to analyze content." });
     } finally {
@@ -89,7 +91,7 @@ export function NicoleChat() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <p className="font-headline font-bold text-primary mb-2">Nicole AI Strategist</p>
+              <p className="font-headline font-bold text-primary mb-2">AI Literacy Lab</p>
               <p className="text-muted-foreground leading-relaxed">
                 Describe the strategic content you need (e.g., "Draft a memo to the board about budget allocations for digital transformation").
               </p>
@@ -199,5 +201,3 @@ export function NicoleChat() {
     </div>
   );
 }
-
-import { FileText } from 'lucide-react';

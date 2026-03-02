@@ -3,7 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'The Nicole Interface | Mogul School AI',
+  title: 'AI Literacy Lab | Mogul School AI',
   description: 'A personal strategist and mentor for college administrators.',
 };
 

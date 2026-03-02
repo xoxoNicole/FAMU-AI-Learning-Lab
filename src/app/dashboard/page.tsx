@@ -14,15 +14,15 @@ const modules = [
     id: '1',
     title: 'AI Foundations for FAMU Faculty',
     description: 'Learn how generative AI is reshaping higher education administration.',
-    image: 'https://picsum.photos/seed/101/600/400',
+    image: 'https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlJTIwc3RyYXRlZ3l8ZW58MHx8fHwxNzcyNDc2MTAyfDA&ixlib=rb-4.1.0&q=80&w=1080',
     progress: 100,
     time: '45 mins',
   },
   {
     id: '2',
     title: 'Drafting Strategic Content',
-    description: 'Master the Nicole Strategist to create high-leverage documents.',
-    image: 'https://picsum.photos/seed/102/600/400',
+    description: 'Master the AI Literacy Lab tools to create high-leverage documents.',
+    image: 'https://images.unsplash.com/photo-1542948330-efbf302472dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d3JpdGluZyUyMHByb3Bvc2FsfGVufDB8fHx8MTc3MjQ3NjEwMnww&ixlib=rb-4.1.0&q=80&w=1080',
     progress: 45,
     time: '1.5 hours',
   },
@@ -30,7 +30,7 @@ const modules = [
     id: '3',
     title: 'Refinement & Iteration',
     description: 'Learn the "Tone Slider" and "Challenge Assumptions" techniques.',
-    image: 'https://picsum.photos/seed/103/600/400',
+    image: 'https://images.unsplash.com/photo-1746716809115-814c45fa1e92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb21tdW5pY2F0aW9uJTIwbmV0d29ya2luZ3xlbnwwfHx8fDE3NzI0NzYxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     progress: 0,
     time: '1 hour',
   }
@@ -59,7 +59,7 @@ export default function Dashboard() {
         <Card className="md:col-span-2 glass-card overflow-hidden group border-none">
           <div className="relative h-64 w-full">
             <Image 
-              src="https://picsum.photos/seed/88/1200/600"
+              src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx1bml2ZXJzaXR5JTIwY2FtcHVzfGVufDB8fHx8MTc3MjM3NTc1OHww&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Hero"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -69,7 +69,7 @@ export default function Dashboard() {
               <span className="bg-accent px-3 py-1 rounded-full text-xs font-bold uppercase mb-4 inline-block">Recommended Next Step</span>
               <h2 className="text-3xl font-headline font-bold mb-2">Module 2: Drafting Strategic Content</h2>
               <p className="text-white/80 max-w-xl">
-                Ready to move beyond theory? Use the Nicole AI Strategist to draft your next institutional memo.
+                Ready to move beyond theory? Use the AI Literacy Lab to draft your next institutional memo.
               </p>
               <Link href="/modules/2">
                 <Button className="mt-6 h-12 px-8 bg-white text-primary hover:bg-white/90 rounded-xl font-headline">
@@ -84,7 +84,7 @@ export default function Dashboard() {
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-2xl font-headline font-bold mb-2">Nicole AI Strategist</h3>
+          <h3 className="text-2xl font-headline font-bold mb-2">AI Literacy Lab</h3>
           <p className="text-white/80 mb-6">
             Jump directly into the AI interaction lab to generate or refine your content.
           </p>

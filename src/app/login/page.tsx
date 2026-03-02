@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldCheck, LogIn } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -15,7 +15,7 @@ export default function LoginPage() {
       {/* Decorative Background Element */}
       <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
         <Image 
-          src="https://picsum.photos/seed/104/1920/1080"
+          src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx1bml2ZXJzaXR5JTIwY2FtcHVzfGVufDB8fHx8MTc3MjM3NTc1OHww&ixlib=rb-4.1.0&q=80&w=1080"
           alt="Campus Background"
           fill
           className="object-cover"
@@ -27,7 +27,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-md mb-4">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-headline font-bold text-white mb-2">The Nicole Interface</h1>
+          <h1 className="text-4xl font-headline font-bold text-white mb-2">AI Literacy Lab</h1>
           <p className="text-white/80 font-body">Exclusive Lab for FAMU Faculty Administrators</p>
         </div>
 

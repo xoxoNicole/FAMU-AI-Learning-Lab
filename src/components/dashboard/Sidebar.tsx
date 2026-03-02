@@ -9,7 +9,6 @@ import {
   BookOpen, 
   Sparkles, 
   FileText, 
-  Settings, 
   LogOut,
   Target
 } from 'lucide-react';
@@ -18,7 +17,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: BookOpen, label: 'Learning Modules', href: '/modules' },
-  { icon: Sparkles, label: 'Nicole Strategist', href: '/strategist' },
+  { icon: Sparkles, label: 'AI Lab', href: '/strategist' },
   { icon: FileText, label: 'My Drafts', href: '/drafts' },
   { icon: Target, label: 'Progress Tracking', href: '/progress' },
 ];
@@ -33,7 +32,7 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          Nicole Interface
+          AI Literacy Lab
         </h1>
       </div>
 
