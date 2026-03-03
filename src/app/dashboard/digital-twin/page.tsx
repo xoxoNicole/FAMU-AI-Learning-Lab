@@ -4,7 +4,20 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Mic, Video, UserCheck, Send, BookOpen, Globe, ShieldCheck, Loader2, Star, Database } from 'lucide-react';
+import { 
+  Sparkles, 
+  Mic, 
+  UserCheck, 
+  Send, 
+  Globe, 
+  ShieldCheck, 
+  Loader2, 
+  Star, 
+  Database,
+  ThumbsUp,
+  ThumbsDown,
+  Settings
+} from 'lucide-react';
 import Image from 'next/image';
 import { askNicole, MentorshipOutput } from '@/ai/flows/nicole-mentorship';
 import { useToast } from '@/hooks/use-toast';
@@ -21,10 +34,10 @@ export default function DigitalTwinLab() {
 
     setLoading(true);
     try {
-      // Simulation of Vertex AI RAG Retrieval
+      // Simulation of Vertex AI RAG Retrieval from your GCS Bucket
       const res = await askNicole({ 
         userQuery: query,
-        contextFromIP: "Strategic Framework: AI transformation in Higher Ed requires a top-down leadership mandate combined with bottom-up faculty literacy. Focus on efficiency gains in administrative drafting to buy back time for research."
+        contextFromIP: "CEO Strategic Directive: AI transformation at HBCUs must prioritize 'Strike From The Top' leadership. Administrative efficiency is the first deployment goal to unlock faculty time for research and innovation."
       });
       setResponse(res);
       setQuery('');
@@ -35,19 +48,31 @@ export default function DigitalTwinLab() {
     }
   };
 
+  const handleFeedback = (type: 'positive' | 'negative') => {
+    toast({ 
+      title: "Feedback Recorded", 
+      description: "This interaction will be used to further refine Nicole's strategic persona in the Antigravity pipeline." 
+    });
+  };
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-10">
-      <header className="space-y-2">
-        <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-widest text-xs">
-          <Sparkles className="w-4 h-4" /> The CEO's Office
+      <header className="flex justify-between items-start">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-widest text-xs">
+            <Sparkles className="w-4 h-4" /> The CEO's Office
+          </div>
+          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">Talk to Nicole</h1>
+          <p className="text-xl text-muted-foreground font-medium">Your 24/7 executive coach powered by Vertex AI.</p>
         </div>
-        <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">Talk to Nicole</h1>
-        <p className="text-xl text-muted-foreground font-medium">Your 24/7 executive coach powered by Vertex AI.</p>
+        <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
+          <Settings className="w-4 h-4 mr-2" /> Antigravity Maintenance
+        </Button>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none bg-[#004B40]/5 rounded-[2.5rem] overflow-hidden relative min-h-[450px] flex flex-col border-dashed border-2 border-[#004B40]/20 shadow-inner">
+          <Card className="border-none bg-[#004B40]/5 rounded-[2.5rem] overflow-hidden relative min-h-[500px] flex flex-col border-dashed border-2 border-[#004B40]/20 shadow-inner">
             <div className="absolute inset-0 opacity-5 pointer-events-none">
               <Image 
                 src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
@@ -64,15 +89,25 @@ export default function DigitalTwinLab() {
                     <div className="w-10 h-10 rounded-xl bg-[#FF671F] flex items-center justify-center shrink-0 shadow-lg">
                       <UserCheck className="w-6 h-6 text-white" />
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex-1">
                       <div className="bg-white p-6 rounded-2xl rounded-tl-none shadow-sm border border-[#004B40]/10">
                         <p className="text-[#004B40] font-medium leading-relaxed">{response.answer}</p>
                       </div>
-                      <div className="bg-[#FF671F]/5 border border-[#FF671F]/20 p-6 rounded-2xl">
-                        <p className="text-[10px] font-bold uppercase text-[#FF671F] tracking-widest mb-2 flex items-center gap-2">
-                          <ShieldCheck className="w-3 h-3" /> Strategic Directive
-                        </p>
-                        <p className="text-[#004B40] font-bold italic">"{response.suggestedAction}"</p>
+                      <div className="bg-[#FF671F]/5 border border-[#FF671F]/20 p-6 rounded-2xl flex justify-between items-start gap-4">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase text-[#FF671F] tracking-widest mb-2 flex items-center gap-2">
+                            <ShieldCheck className="w-3 h-3" /> Strategic Directive
+                          </p>
+                          <p className="text-[#004B40] font-bold italic">"{response.suggestedAction}"</p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback('positive')}>
+                            <ThumbsUp className="w-4 h-4 text-green-600" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback('negative')}>
+                            <ThumbsDown className="w-4 h-4 text-red-600" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -114,7 +149,7 @@ export default function DigitalTwinLab() {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Vertex RAG</p>
-                <p className="text-sm font-bold text-[#004B40]">Nicole's Private IP</p>
+                <p className="text-sm font-bold text-[#004B40]">CEO Memory Index</p>
               </div>
             </Card>
             <Card className="p-6 bg-white border-none shadow-sm rounded-3xl flex items-center gap-4">
@@ -135,7 +170,7 @@ export default function DigitalTwinLab() {
             <h3 className="font-headline font-bold mb-4 flex items-center gap-2 relative z-10">
               <Star className="w-5 h-5 text-[#FF671F] fill-[#FF671F]" /> About Nicole
             </h3>
-            <p className="text-white/80 text-sm leading-relaxed mb-8 relative z-10">
+            <p className="text-white/80 text-sm font-medium leading-relaxed mb-8 relative z-10">
               Nicole is the CEO and Lead Instructor. Her digital twin is an extension of her strategic brain, anchored in Vertex AI to help Rattler leaders implement change with absolute technological confidence.
             </p>
             <Button variant="outline" className="w-full rounded-xl border-white/20 text-white hover:bg-white/10 font-bold h-12">

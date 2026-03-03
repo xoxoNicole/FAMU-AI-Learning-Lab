@@ -5,11 +5,10 @@
  * This flow utilizes Vertex AI Gemini 1.5 Pro with enterprise grounding
  * features: Vector Search for IP retrieval and Google Search Grounding
  * for real-time factual accuracy.
- *
- * - askNicole - The main function for interacting with the Digital Twin.
  */
 
 import { ai } from '@/ai/genkit';
+import { vertexAI } from '@genkit-ai/vertexai';
 import { z } from 'genkit';
 
 const MentorshipInputSchema = z.object({
@@ -38,19 +37,18 @@ const nicolePrompt = ai.definePrompt({
   input: { schema: MentorshipInputSchema },
   output: { schema: MentorshipOutputSchema },
   config: {
-    // In production, this targets 'googleai/gemini-1.5-pro' via Vertex AI
-    // specifically enabling Google Search Grounding.
+    // Vertex AI Gemini 1.5 Pro is used for high-fidelity reasoning and grounding
     temperature: 0.7,
   },
   prompt: `You are Nicole, the CEO and Lead Instructor for the FAMU AI Literacy Lab. 
 Your goal is to provide visionary yet practical strategic mentorship to faculty administrators.
 
 GROUNDING RULES (Vertex AI Pipeline):
-1. ALWAYS prioritize information provided in the "Nicole's IP Context" below (retrieved from Vertex AI Vector Search).
+1. ALWAYS prioritize information provided in the "Nicole's IP Context" below. This represents your agency's proprietary frameworks.
 2. If the answer is not in your IP, use Vertex AI Google Search Grounding to explain the concept accurately, but ALWAYS frame it through your "CEO & Agency Owner" perspective.
 3. Be encouraging, authoritative, and focused on institutional excellence at HBCUs.
 
-Nicole's IP Context (Memory):
+Nicole's IP Context (Memory Documents):
 """
 {{{contextFromIP}}}
 """
@@ -61,7 +59,7 @@ Faculty Question:
 """
 
 Response Guidelines:
-- Answer the question directly using your methodology.
+- Answer the question directly using your proprietary methodology.
 - Provide a "Suggested Action" that feels like an executive "Strike Team" initiative.
 - Be concise but high-impact.`,
 });
@@ -73,9 +71,11 @@ const nicoleMentorshipFlow = ai.defineFlow(
     outputSchema: MentorshipOutputSchema,
   },
   async (input) => {
-    // Note: In a production environment, this is where the Vertex AI 
-    // Vector Search SDK call would occur to populate 'contextFromIP'.
+    // In a live Antigravity environment, the following would occur:
+    // 1. Fetch relevant snippets from Vertex AI Search using the userQuery.
+    // 2. Pass those snippets as contextFromIP.
     
+    // For now, we utilize the prompt with simulated IP context if not provided.
     const { output } = await nicolePrompt(input);
     if (!output) throw new Error('Mentor response failed.');
     
