@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Mic, Video, UserCheck, Send, BookOpen, Globe, ShieldCheck, Loader2 } from 'lucide-react';
+import { Sparkles, Mic, Video, UserCheck, Send, BookOpen, Globe, ShieldCheck, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import { askNicole, MentorshipOutput } from '@/ai/flows/nicole-mentorship';
 import { useToast } from '@/hooks/use-toast';
@@ -147,13 +147,13 @@ export default function DigitalTwinLab() {
           <Card className="bg-[#004B40] text-white border-none rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2" />
             <h3 className="font-headline font-bold mb-4 flex items-center gap-2 relative z-10">
-              <Globe className="w-5 h-5 text-[#FF671F]" /> Grounding Logic
+              <Star className="w-5 h-5 text-[#FF671F] fill-[#FF671F]" /> About Nicole
             </h3>
             <p className="text-white/80 text-sm leading-relaxed mb-8 relative z-10">
-              Nicole's twin is anchored in your agency's proprietary frameworks (Memory) and cross-references live information using Google Search (Anchor). This ensures every response is both original and accurate.
+              Nicole is the CEO and Lead Instructor behind this laboratory. Her digital twin is an extension of her strategic brain, trained on years of proprietary frameworks to help Rattler leaders implement change with technological confidence.
             </p>
             <Button variant="outline" className="w-full rounded-xl border-white/20 text-white hover:bg-white/10 font-bold h-12">
-              View Memory Documents
+              View Instructor Bio
             </Button>
           </Card>
         </div>
