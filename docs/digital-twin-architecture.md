@@ -1,28 +1,27 @@
-# Digital Twin Teacher: Technical Architecture
+# Nicole: The AI Mentor & Digital Twin
 
-This document outlines the blueprint for deploying a "Digital Twin" of FAMU faculty using Google Cloud and Vertex AI.
+This document outlines the blueprint for deploying a "Digital Twin" of Nicole, the CEO and Lead Instructor, to provide 24/7 strategic mentorship to FAMU faculty.
 
-## 1. Intelligence Layer (The Brain)
+## 1. Intelligence Layer (The CEO's Brain)
 - **Model**: Vertex AI Gemini 1.5 Pro.
-- **Context**: Fine-tuned or grounded using RAG (Retrieval Augmented Generation) on faculty lecture notes, publications, and syllabi.
-- **Personality**: System instructions define the "Rattler Mentor" persona, ensuring a specific tone and pedagogical approach.
+- **Context**: Grounded in Nicole's agency's proprietary training materials, strategic frameworks, and institutional change management philosophies.
+- **Persona**: An expert, visionary CEO who balances high-level strategy with practical HBCU administrative needs.
 
-## 2. Vocal Layer (The Voice)
+## 2. Vocal Layer (The Voice of Leadership)
 - **Service**: Google Cloud Text-to-Speech (TTS).
 - **Technology**: 
-    - **Neural2 Voices**: High-fidelity pre-built voices.
-    - **Custom Voice**: Training a model on 3-5 hours of faculty voice recordings to create a unique biological clone.
-- **Output**: SSML (Speech Synthesis Markup Language) to control emphasis, pitch, and speed for natural lecturing.
+    - **Custom Voice**: A biological vocal clone trained on 3-5 hours of Nicole's high-quality training audio.
+- **Output**: Natural, authoritative, and encouraging speech patterns characteristic of Nicole's lecturing style.
 
-## 3. Visual Layer (The Presence)
-- **Avatar Generation**: Integration with Vertex AI specialized models or third-party APIs (e.g., HeyGen, D-ID) to animate a static image.
-- **Lip-Sync**: Aligning phonemes from the audio output with the visual mouth movements of the avatar.
-- **Environment**: Using Imagen 3 to generate consistent university-branded backgrounds (e.g., the FAMU Eternal Flame or Lee Hall).
+## 3. Visual Layer (The Digital Presence)
+- **Avatar**: A professional, animated avatar of Nicole.
+- **Lip-Sync**: High-fidelity phoneme alignment ensuring the visual representation matches the custom vocal output in real-time.
+- **Environment**: Branded background representing the "Mogul School" or the FAMU Innovation Lab.
 
-## 4. Integration Flow
-1. **User Input**: Student asks a question in the Lab.
-2. **Genkit Flow**: 
-    - LLM generates response text.
-    - TTS generates audio file.
-    - Animation engine generates video frames.
-3. **Frontend**: The `DigitalTwinPlayer` component streams the combined media back to the student.
+## 4. Interaction Flow
+1. **User Query**: Faculty member asks a question about a module or a strategic challenge.
+2. **Mentorship Engine**: 
+    - Gemini generates a response in Nicole's voice.
+    - TTS generates the specific vocal delivery.
+    - Avatar synthesis animates Nicole's presence.
+3. **Delivery**: The `DigitalTwinPlayer` streams Nicole's response back to the faculty member, providing a personalized one-on-one coaching experience.

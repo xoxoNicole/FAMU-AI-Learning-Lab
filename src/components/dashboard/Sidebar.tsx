@@ -11,7 +11,8 @@ import {
   FileText, 
   LogOut,
   Target,
-  Video
+  Video,
+  UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +21,7 @@ const navItems = [
   { icon: BookOpen, label: 'The Curriculum', href: '/modules' },
   { icon: Sparkles, label: 'The Lab', href: '/strategist' },
   { icon: FileText, label: 'My Drafts', href: '/drafts' },
-  { icon: Video, label: 'Digital Twin', href: '/dashboard/digital-twin' },
+  { icon: UserCheck, label: 'Talk to Nicole', href: '/dashboard/digital-twin' },
   { icon: Target, label: 'Strategic Progress', href: '/progress' },
 ];
 
