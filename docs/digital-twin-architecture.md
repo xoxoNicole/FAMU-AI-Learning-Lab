@@ -1,6 +1,6 @@
-# Nicole: The AI Mentor & Digital Twin
+# Nicole: The AI Mentor & Digital Twin (Vertex AI Architecture)
 
-This document outlines the blueprint for deploying a "Digital Twin" of Nicole, the CEO and Lead Instructor, to provide 24/7 strategic mentorship to FAMU faculty.
+This document outlines the blueprint for deploying a "Digital Twin" of Nicole, the CEO and Lead Instructor, using Vertex AI to provide 24/7 strategic mentorship to FAMU faculty.
 
 ## 1. Intelligence Layer (The CEO's Brain)
 - **Model**: Vertex AI Gemini 1.5 Pro.
@@ -9,7 +9,7 @@ This document outlines the blueprint for deploying a "Digital Twin" of Nicole, t
     - **Vector Indexing**: These documents are converted into embeddings and stored in **Vertex AI Vector Search**.
     - **RAG Pipeline**: Every query triggers a semantic search across Nicole's IP to ensure responses are anchored in her specific methodology.
 - **Grounding (The Internet Anchor)**:
-    - **Google Search Integration**: The model is configured with "Google Search Grounding" to provide real-time, factual explanations for external concepts while staying true to the core persona.
+    - **Vertex AI Google Search Grounding**: The model is configured with the Google Search tool to provide real-time, factual explanations for external concepts while staying true to the core persona.
 - **Persona**: An expert, visionary CEO who balances high-level strategy with practical HBCU administrative needs.
 
 ## 2. Vocal Layer (The Voice of Leadership)
@@ -24,9 +24,9 @@ This document outlines the blueprint for deploying a "Digital Twin" of Nicole, t
 
 ## 4. Interaction Flow
 1. **User Query**: Faculty member asks a question about a module or a strategic challenge.
-2. **Retrieval**: The system fetches relevant snippets from Nicole's IP bucket.
+2. **Retrieval**: The system fetches relevant snippets from Nicole's IP bucket using **Vertex AI Vector Search**.
 3. **Mentorship Engine**: 
-    - Gemini synthesizes a response using the IP snippets + Google Search results.
+    - Gemini 1.5 Pro synthesizes a response using the IP snippets + Vertex AI Google Search results.
     - TTS generates the specific vocal delivery.
     - Avatar synthesis animates Nicole's presence.
 4. **Delivery**: The `DigitalTwinPlayer` streams the anchored response back to the faculty member.

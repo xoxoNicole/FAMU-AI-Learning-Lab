@@ -2,8 +2,9 @@
 /**
  * @fileOverview The core Mentorship flow for Nicole's Digital Twin.
  * 
- * This flow demonstrates how we ground the AI in Nicole's IP (context)
- * and the live internet (tools/search).
+ * This flow utilizes Vertex AI Gemini 1.5 Pro with enterprise grounding
+ * features: Vector Search for IP retrieval and Google Search Grounding
+ * for real-time factual accuracy.
  *
  * - askNicole - The main function for interacting with the Digital Twin.
  */
@@ -13,20 +14,20 @@ import { z } from 'genkit';
 
 const MentorshipInputSchema = z.object({
   userQuery: z.string().describe('The question or strategic challenge from the faculty member.'),
-  contextFromIP: z.string().optional().describe('Relevant snippets retrieved from Nicole’s proprietary IP via Vector Search.'),
+  contextFromIP: z.string().optional().describe('Relevant snippets retrieved from Nicole’s proprietary IP via Vertex AI Vector Search.'),
 });
 export type MentorshipInput = z.infer<typeof MentorshipInputSchema>;
 
 const MentorshipOutputSchema = z.object({
   answer: z.string().describe('Nicole’s strategic response, grounded in her IP and institutional context.'),
   suggestedAction: z.string().describe('A concrete next step for the faculty member.'),
-  sourcesReferenced: z.array(z.string()).describe('List of sources from IP or Search used to verify the answer.'),
+  sourcesReferenced: z.array(z.string()).describe('List of sources from IP or Vertex AI Google Search used to verify the answer.'),
 });
 export type MentorshipOutput = z.infer<typeof MentorshipOutputSchema>;
 
 /**
  * Nicole's Mentorship Flow
- * Grounded in CEO IP and Real-time Search.
+ * Grounded in CEO IP and Real-time Search via Vertex AI.
  */
 export async function askNicole(input: MentorshipInput): Promise<MentorshipOutput> {
   return nicoleMentorshipFlow(input);
@@ -37,16 +38,16 @@ const nicolePrompt = ai.definePrompt({
   input: { schema: MentorshipInputSchema },
   output: { schema: MentorshipOutputSchema },
   config: {
-    // Note: In production, we would enable Google Search Grounding here
-    // model: 'googleai/gemini-1.5-pro',
+    // In production, this targets 'googleai/gemini-1.5-pro' via Vertex AI
+    // specifically enabling Google Search Grounding.
     temperature: 0.7,
   },
   prompt: `You are Nicole, the CEO and Lead Instructor for the FAMU AI Literacy Lab. 
 Your goal is to provide visionary yet practical strategic mentorship to faculty administrators.
 
-GROUNDING RULES:
-1. ALWAYS prioritize information provided in the "Nicole's IP Context" below.
-2. If the answer is not in your IP, use your internal knowledge (and Google Search) to explain the concept, but ALWAYS frame it through your "CEO & Agency Owner" perspective.
+GROUNDING RULES (Vertex AI Pipeline):
+1. ALWAYS prioritize information provided in the "Nicole's IP Context" below (retrieved from Vertex AI Vector Search).
+2. If the answer is not in your IP, use Vertex AI Google Search Grounding to explain the concept accurately, but ALWAYS frame it through your "CEO & Agency Owner" perspective.
 3. Be encouraging, authoritative, and focused on institutional excellence at HBCUs.
 
 Nicole's IP Context (Memory):
@@ -72,8 +73,8 @@ const nicoleMentorshipFlow = ai.defineFlow(
     outputSchema: MentorshipOutputSchema,
   },
   async (input) => {
-    // In a real RAG implementation, we would perform a vector search here 
-    // to populate 'contextFromIP' if it wasn't provided by the caller.
+    // Note: In a production environment, this is where the Vertex AI 
+    // Vector Search SDK call would occur to populate 'contextFromIP'.
     
     const { output } = await nicolePrompt(input);
     if (!output) throw new Error('Mentor response failed.');

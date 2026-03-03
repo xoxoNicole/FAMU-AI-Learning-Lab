@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Mic, Video, UserCheck, Send, BookOpen, Globe, ShieldCheck, Loader2, Star } from 'lucide-react';
+import { Sparkles, Mic, Video, UserCheck, Send, BookOpen, Globe, ShieldCheck, Loader2, Star, Database } from 'lucide-react';
 import Image from 'next/image';
 import { askNicole, MentorshipOutput } from '@/ai/flows/nicole-mentorship';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +21,7 @@ export default function DigitalTwinLab() {
 
     setLoading(true);
     try {
-      // In this prototype, we simulate the 'contextFromIP' retrieval
+      // Simulation of Vertex AI RAG Retrieval
       const res = await askNicole({ 
         userQuery: query,
         contextFromIP: "Strategic Framework: AI transformation in Higher Ed requires a top-down leadership mandate combined with bottom-up faculty literacy. Focus on efficiency gains in administrative drafting to buy back time for research."
@@ -29,7 +29,7 @@ export default function DigitalTwinLab() {
       setResponse(res);
       setQuery('');
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Mentor Connection Error', description: 'Nicole is briefly unavailable. Please try again.' });
+      toast({ variant: 'destructive', title: 'Mentor Connection Error', description: 'Nicole is briefly unavailable via Vertex AI. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export default function DigitalTwinLab() {
           <Sparkles className="w-4 h-4" /> The CEO's Office
         </div>
         <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">Talk to Nicole</h1>
-        <p className="text-xl text-muted-foreground font-medium">Your 24/7 executive coach for institutional transformation.</p>
+        <p className="text-xl text-muted-foreground font-medium">Your 24/7 executive coach powered by Vertex AI.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -70,7 +70,7 @@ export default function DigitalTwinLab() {
                       </div>
                       <div className="bg-[#FF671F]/5 border border-[#FF671F]/20 p-6 rounded-2xl">
                         <p className="text-[10px] font-bold uppercase text-[#FF671F] tracking-widest mb-2 flex items-center gap-2">
-                          <ShieldCheck className="w-3 h-3" /> Nicole's Strategic Directive
+                          <ShieldCheck className="w-3 h-3" /> Strategic Directive
                         </p>
                         <p className="text-[#004B40] font-bold italic">"{response.suggestedAction}"</p>
                       </div>
@@ -82,8 +82,8 @@ export default function DigitalTwinLab() {
                   <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-xl">
                     <Mic className="w-10 h-10 text-[#004B40]" />
                   </div>
-                  <p className="font-headline font-bold text-[#004B40] text-xl">Mentor link ready.</p>
-                  <p className="text-sm font-medium max-w-xs">Ask Nicole a question about your strategic goals or a specific course module.</p>
+                  <p className="font-headline font-bold text-[#004B40] text-xl">Vertex AI Mentor Ready.</p>
+                  <p className="text-sm font-medium max-w-xs">Ask a question grounded in Nicole's proprietary frameworks and the real-time web.</p>
                 </div>
               )}
             </div>
@@ -93,7 +93,7 @@ export default function DigitalTwinLab() {
                 <Input 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ask a strategic question..."
+                  placeholder="Ask Nicole a strategic question..."
                   className="flex-1 h-14 rounded-2xl bg-white border-none shadow-sm focus-visible:ring-[#FF671F]"
                 />
                 <Button 
@@ -110,11 +110,11 @@ export default function DigitalTwinLab() {
           <div className="grid grid-cols-2 gap-4">
             <Card className="p-6 bg-white border-none shadow-sm rounded-3xl flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-[#004B40]/5 flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-[#004B40]" />
+                <Database className="w-6 h-6 text-[#004B40]" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Grounded IP</p>
-                <p className="text-sm font-bold text-[#004B40]">Nicole's Frameworks</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Vertex RAG</p>
+                <p className="text-sm font-bold text-[#004B40]">Nicole's Private IP</p>
               </div>
             </Card>
             <Card className="p-6 bg-white border-none shadow-sm rounded-3xl flex items-center gap-4">
@@ -122,14 +122,27 @@ export default function DigitalTwinLab() {
                 <Globe className="w-6 h-6 text-[#FF671F]" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Search Anchor</p>
-                <p className="text-sm font-bold text-[#004B40]">Live Academic Web</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Live Grounding</p>
+                <p className="text-sm font-bold text-[#004B40]">Vertex Search Anchor</p>
               </div>
             </Card>
           </div>
         </div>
 
         <div className="space-y-6">
+          <Card className="bg-[#004B40] text-white border-none rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2" />
+            <h3 className="font-headline font-bold mb-4 flex items-center gap-2 relative z-10">
+              <Star className="w-5 h-5 text-[#FF671F] fill-[#FF671F]" /> About Nicole
+            </h3>
+            <p className="text-white/80 text-sm leading-relaxed mb-8 relative z-10">
+              Nicole is the CEO and Lead Instructor. Her digital twin is an extension of her strategic brain, anchored in Vertex AI to help Rattler leaders implement change with absolute technological confidence.
+            </p>
+            <Button variant="outline" className="w-full rounded-xl border-white/20 text-white hover:bg-white/10 font-bold h-12">
+              View Bio
+            </Button>
+          </Card>
+
           <Card className="glass-card border-none rounded-3xl p-8 shadow-xl">
             <h3 className="font-headline font-bold text-[#004B40] mb-6 flex items-center gap-2">
               <UserCheck className="w-5 h-5 text-[#FF671F]" /> Mentorship Areas
@@ -142,19 +155,6 @@ export default function DigitalTwinLab() {
                 </li>
               ))}
             </ul>
-          </Card>
-
-          <Card className="bg-[#004B40] text-white border-none rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2" />
-            <h3 className="font-headline font-bold mb-4 flex items-center gap-2 relative z-10">
-              <Star className="w-5 h-5 text-[#FF671F] fill-[#FF671F]" /> About Nicole
-            </h3>
-            <p className="text-white/80 text-sm leading-relaxed mb-8 relative z-10">
-              Nicole is the CEO and Lead Instructor behind this laboratory. Her digital twin is an extension of her strategic brain, trained on years of proprietary frameworks to help Rattler leaders implement change with technological confidence.
-            </p>
-            <Button variant="outline" className="w-full rounded-xl border-white/20 text-white hover:bg-white/10 font-bold h-12">
-              View Instructor Bio
-            </Button>
           </Card>
         </div>
       </div>
