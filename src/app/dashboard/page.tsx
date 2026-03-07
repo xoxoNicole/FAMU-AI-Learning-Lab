@@ -5,44 +5,27 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PlayCircle, Clock, BookCheck, FileText, ArrowRight, Zap } from 'lucide-react';
+import { Sparkles, PlayCircle, Clock, BookCheck, FileText, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { format } from 'date-fns';
-
-const modules = [
-  {
-    id: '1',
-    title: 'AI Foundations',
-    description: 'Generative AI within the HBCU context.',
-    image: 'https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    progress: 100,
-    time: '45 mins',
-  },
-  {
-    id: '2',
-    title: 'Strategic Drafting',
-    description: 'Master the tools for high-leverage documents.',
-    image: 'https://images.unsplash.com/photo-1542948330-efbf302472dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    progress: 45,
-    time: '1.5 hours',
-  },
-  {
-    id: '3',
-    title: 'Refinement Lab',
-    description: 'Learn advanced "Tone Slider" techniques.',
-    image: 'https://images.unsplash.com/photo-1746716809115-814c45fa1e92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    progress: 0,
-    time: '1 hour',
-  }
-];
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Dashboard() {
   const { user } = useUser();
   const db = useFirestore();
 
+  // Fetch real modules from Firestore
+  const modulesQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'modules'), orderBy('title', 'asc'), limit(3));
+  }, [db]);
+
+  const { data: modules, isLoading: modulesLoading } = useCollection(modulesQuery);
+
+  // Fetch recent drafts
   const recentDraftsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -54,15 +37,17 @@ export default function Dashboard() {
 
   const { data: recentDrafts, isLoading: draftsLoading } = useCollection(recentDraftsQuery);
 
+  const heroImage = PlaceHolderImages.find(img => img.id === 'login-bg')?.imageUrl || "https://picsum.photos/seed/famu1/1200/800";
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <p className="text-xs font-bold text-[#FF671F] uppercase tracking-[0.3em]">Administrator Dashboard</p>
-          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tighter">
+          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tighter leading-none">
             Welcome, {user?.displayName?.split(' ')[0] || 'Rattler'}
           </h1>
-          <p className="text-muted-foreground text-lg font-medium">Your strategic laboratory is initialized and ready for deployment.</p>
+          <p className="text-muted-foreground text-lg font-medium mt-2">Your strategic laboratory is initialized and ready for deployment.</p>
         </div>
         <div className="flex gap-4">
           <Card className="shadow-2xl shadow-green-900/5 border-none px-6 py-4 flex items-center gap-4 bg-white rounded-3xl">
@@ -80,7 +65,7 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2 overflow-hidden border-none rounded-[2.5rem] shadow-2xl relative group h-[400px]">
           <Image 
-            src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+            src={heroImage}
             alt="Hero"
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -112,7 +97,9 @@ export default function Dashboard() {
           </div>
           <div className="flex-1 space-y-4">
             {draftsLoading ? (
-              <div className="text-sm text-muted-foreground italic">Syncing with lab storage...</div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground italic">
+                <Loader2 className="w-4 h-4 animate-spin" /> Syncing with lab storage...
+              </div>
             ) : recentDrafts && recentDrafts.length > 0 ? (
               recentDrafts.map(draft => (
                 <Link key={draft.id} href={`/dashboard/strategist?draftId=${draft.id}`}>
@@ -150,39 +137,48 @@ export default function Dashboard() {
           <h3 className="text-3xl font-headline font-bold text-[#004B40]">Active Curriculum</h3>
           <Link href="/dashboard/modules" className="text-[#FF671F] font-bold uppercase tracking-widest text-xs hover:underline">Complete Catalog</Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {modules.map((module) => (
-            <Card key={module.id} className="bg-white hover:translate-y-[-8px] transition-all duration-500 border-none rounded-[2rem] overflow-hidden group shadow-lg">
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image src={module.image} alt={module.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-[#004B40] shadow-xl flex items-center gap-2">
-                  <Clock className="w-3 h-3 text-[#FF671F]" /> {module.time}
-                </div>
-              </div>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-headline text-[#004B40] group-hover:text-[#FF671F] transition-colors">{module.title}</CardTitle>
-                <CardDescription className="font-medium">{module.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                      <span>Mastery Progress</span>
-                      <span>{module.progress}%</span>
-                    </div>
-                    <Progress value={module.progress} className="h-2 bg-muted rounded-full" />
+        
+        {modulesLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => <Card key={i} className="h-64 animate-pulse bg-muted rounded-[2rem]" />)}
+          </div>
+        ) : modules && modules.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {modules.map((module) => (
+              <Card key={module.id} className="bg-white hover:translate-y-[-8px] transition-all duration-500 border-none rounded-[2rem] overflow-hidden group shadow-lg">
+                <div className="relative h-48 w-full overflow-hidden">
+                  <Image 
+                    src={module.thumbnail || PlaceHolderImages.find(img => img.id === 'module-1')?.imageUrl || "https://picsum.photos/seed/m1/600/400"} 
+                    alt={module.title} 
+                    fill 
+                    className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-[#004B40] shadow-xl flex items-center gap-2">
+                    <Clock className="w-3 h-3 text-[#FF671F]" /> {module.duration || '45 mins'}
                   </div>
-                  <Link href={`/dashboard/modules`} className="block">
-                    <Button className="w-full h-12 bg-[#004B40] hover:bg-[#004B40]/90 text-white font-bold rounded-2xl shadow-lg transition-all group-hover:shadow-green-900/20">
-                      <PlayCircle className="w-4 h-4 mr-2" />
-                      {module.progress === 100 ? 'Review Module' : 'Resume Lab'}
-                    </Button>
-                  </Link>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl font-headline text-[#004B40] group-hover:text-[#FF671F] transition-colors">{module.title}</CardTitle>
+                  <CardDescription className="font-medium line-clamp-2">{module.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-5">
+                    <Link href={`/dashboard/modules/${module.id}`} className="block">
+                      <Button className="w-full h-12 bg-[#004B40] hover:bg-[#004B40]/90 text-white font-bold rounded-2xl shadow-lg transition-all group-hover:shadow-green-900/20">
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Start Module
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="p-20 text-center bg-muted/20 border-none rounded-[2rem]">
+            <p className="text-muted-foreground font-medium italic">The strategic curriculum is currently being initialized.</p>
+          </Card>
+        )}
       </section>
     </div>
   );

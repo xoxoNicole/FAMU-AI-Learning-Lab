@@ -18,17 +18,21 @@ import {
   Loader2,
   FileText,
   Check,
-  History
+  History,
+  ChevronRight,
+  ChevronDown,
+  Clock
 } from 'lucide-react';
 import { generateStrategicContent } from '@/ai/flows/generate-strategic-content';
 import { challengeAssumptionsAndFeedback } from '@/ai/flows/challenge-assumptions-and-feedback';
 import { refineContentWithAI } from '@/ai/flows/refine-content-with-ai';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useSearchParams } from 'next/navigation';
+import { format } from 'date-fns';
 
 export function NicoleChat() {
   const [input, setInput] = useState('');
@@ -38,12 +42,24 @@ export function NicoleChat() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [tone, setTone] = useState([50]); // 0: Academic, 100: Visionary
   const [feedback, setFeedback] = useState<any>(null);
+  const [showHistory, setShowHistory] = useState(false);
   
   const { toast } = useToast();
   const { user } = useUser();
   const db = useFirestore();
   const searchParams = useSearchParams();
   const draftId = searchParams.get('draftId');
+
+  // Fetch revisions history
+  const revisionsQuery = useMemoFirebase(() => {
+    if (!db || !user || !draftId) return null;
+    return query(
+      collection(db, 'userProfiles', user.uid, 'outputs', draftId, 'revisions'),
+      orderBy('refinementTimestamp', 'desc')
+    );
+  }, [db, user, draftId]);
+
+  const { data: revisions } = useCollection(revisionsQuery);
 
   useEffect(() => {
     async function loadDraft() {
@@ -54,7 +70,7 @@ export function NicoleChat() {
           const data = snap.data();
           setOutput(data.content || '');
           setTone([data.currentToneSetting === 'visionary' ? 80 : data.currentToneSetting === 'academic' ? 20 : 50]);
-          setInput(data.title || '');
+          setInput(data.initialPrompt || '');
         }
       }
     }
@@ -72,6 +88,13 @@ export function NicoleChat() {
       refinementTimestamp: new Date().toISOString(),
       isAISuggested
     });
+
+    // Update the main output doc content as well
+    const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
+    updateDoc(draftRef, {
+      content: content,
+      updatedAt: new Date().toISOString()
+    });
   };
 
   const handleGenerate = async () => {
@@ -83,7 +106,6 @@ export function NicoleChat() {
       setOutput(res.draft);
       toast({ title: "Draft Generated", description: "Your strategic content is ready for refinement." });
       
-      // If we are already in a draft, save this as a major revision
       if (draftId) {
         saveRevision(res.draft, "Major re-generation from prompt", true);
       }
@@ -104,18 +126,17 @@ export function NicoleChat() {
         const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
         await updateDoc(draftRef, {
           title: input.substring(0, 50) || "Untitled Strategic Output",
-          status: 'draft',
+          content: output,
           currentToneSetting: toneValue,
           updatedAt: new Date().toISOString()
         });
-        
-        // When user manually saves, we also create a manual revision snapshot
         saveRevision(output, "Manual Save/Checkpoint");
       } else {
         const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Output";
         const docRef = await addDoc(collection(db, 'userProfiles', user.uid, 'outputs'), {
           userId: user.uid,
           title: title,
+          content: output,
           outputType: 'strategic memo',
           status: 'draft',
           initialPrompt: input,
@@ -124,7 +145,6 @@ export function NicoleChat() {
           updatedAt: new Date().toISOString(),
         });
 
-        // Add initial revision
         await addDoc(collection(db, 'userProfiles', user.uid, 'outputs', docRef.id, 'revisions'), {
           outputId: docRef.id,
           content: output,
@@ -177,7 +197,7 @@ export function NicoleChat() {
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex-1 overflow-y-auto space-y-6 pr-4">
+      <div className="flex-1 overflow-y-auto space-y-6 pr-4 custom-scrollbar">
         <Card className="glass-card p-6 border-none shadow-none bg-[#004B40]/5">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-2xl bg-[#004B40] flex items-center justify-center shrink-0 shadow-lg">
@@ -193,37 +213,76 @@ export function NicoleChat() {
         </Card>
 
         {output && (
-          <Card className="glass-card p-8 border-none shadow-2xl rounded-[2.5rem] animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white relative">
-            <div className="absolute top-8 right-8 flex gap-2">
-              <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 hover:bg-muted">
-                <History className="w-4 h-4 text-[#004B40]" />
-              </Button>
-            </div>
-            <div className="prose prose-green max-w-none">
-              <h4 className="text-xl font-headline font-bold text-[#004B40] mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#FF671F]" /> Active Strategic Brief
-              </h4>
-              <div className="text-[#004B40] leading-relaxed whitespace-pre-wrap font-medium">
-                {output}
+          <div className="space-y-6">
+            <Card className="glass-card p-8 border-none shadow-2xl rounded-[2.5rem] animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white relative">
+              <div className="absolute top-8 right-8 flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setShowHistory(!showHistory)}
+                  className={cn("rounded-full transition-colors", showHistory ? "bg-[#004B40] text-white" : "bg-muted/50 text-[#004B40] hover:bg-muted")}
+                >
+                  <History className="w-4 h-4" />
+                </Button>
               </div>
-            </div>
-            
-            <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-muted">
-              <Button onClick={() => {
-                navigator.clipboard.writeText(output);
-                toast({ title: "Copied", description: "Strategy copied to clipboard." });
-              }} variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
-                <Copy className="w-4 h-4 mr-2" /> Copy text
-              </Button>
-              <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "default"} className={cn("rounded-xl h-12 font-bold px-8 transition-all", saveSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-[#004B40] hover:bg-[#004B40]/90 text-white shadow-xl shadow-green-900/10")}>
-                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                {saveSuccess ? "Archived!" : draftId ? "Save Changes" : "Save to Repository"}
-              </Button>
-              <Button variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
-                <Download className="w-4 h-4 mr-2" /> Export PDF
-              </Button>
-            </div>
-          </Card>
+              <div className="prose prose-green max-w-none">
+                <h4 className="text-xl font-headline font-bold text-[#004B40] mb-6 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-[#FF671F]" /> Active Strategic Brief
+                </h4>
+                <div className="text-[#004B40] leading-relaxed whitespace-pre-wrap font-medium">
+                  {output}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-muted">
+                <Button onClick={() => {
+                  navigator.clipboard.writeText(output);
+                  toast({ title: "Copied", description: "Strategy copied to clipboard." });
+                }} variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
+                  <Copy className="w-4 h-4 mr-2" /> Copy text
+                </Button>
+                <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "default"} className={cn("rounded-xl h-12 font-bold px-8 transition-all", saveSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-[#004B40] hover:bg-[#004B40]/90 text-white shadow-xl shadow-green-900/10")}>
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                  {saveSuccess ? "Archived!" : draftId ? "Save Changes" : "Save to Repository"}
+                </Button>
+                <Button variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
+                  <Download className="w-4 h-4 mr-2" /> Export PDF
+                </Button>
+              </div>
+            </Card>
+
+            {showHistory && revisions && revisions.length > 0 && (
+              <Card className="border-none bg-muted/30 rounded-[2.5rem] p-8 animate-in slide-in-from-right-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-lg font-headline font-bold text-[#004B40] flex items-center gap-2">
+                    <History className="w-5 h-5 text-[#FF671F]" /> Antigravity Revision Log
+                  </h4>
+                  <Button variant="ghost" size="sm" onClick={() => setShowHistory(false)} className="rounded-full h-8 w-8 p-0">
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {revisions.map((rev) => (
+                    <div 
+                      key={rev.id} 
+                      onClick={() => setOutput(rev.content)}
+                      className="p-4 rounded-2xl bg-white border border-[#004B40]/5 hover:border-[#FF671F]/20 cursor-pointer transition-all hover:shadow-md group"
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <p className="text-sm font-bold text-[#004B40] group-hover:text-[#FF671F] transition-colors">
+                          {rev.appliedRefinementDescription}
+                        </p>
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {rev.refinementTimestamp ? format(new Date(rev.refinementTimestamp), 'MMM d, h:mm a') : 'Recent'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1 italic">"{rev.content.substring(0, 100)}..."</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
         )}
 
         {feedback && (
@@ -234,15 +293,15 @@ export function NicoleChat() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Structural Weaknesses</p>
-                <p className="text-[#004B40] font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
+                <div className="text-[#004B40] text-sm font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
                   {feedback.identifiedWeaknesses}
-                </p>
+                </div>
               </div>
               <div className="space-y-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Alternative Perspectives</p>
-                <p className="text-[#004B40] font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
+                <div className="text-[#004B40] text-sm font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
                   {feedback.alternativePerspectives}
-                </p>
+                </div>
               </div>
             </div>
           </Card>
