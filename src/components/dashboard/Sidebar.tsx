@@ -11,10 +11,13 @@ import {
   FileText, 
   LogOut,
   Target,
-  UserCheck
+  UserCheck,
+  History,
+  ArrowUpRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
@@ -30,7 +33,20 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const auth = useAuth();
+  const { user } = useUser();
+  const db = useFirestore();
   const router = useRouter();
+
+  const recentDraftsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'userProfiles', user.uid, 'outputs'),
+      orderBy('updatedAt', 'desc'),
+      limit(2)
+    );
+  }, [db, user]);
+
+  const { data: recentDrafts } = useCollection(recentDraftsQuery);
 
   const handleLogout = async () => {
     if (auth) {
@@ -53,10 +69,10 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1.5">
+      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
         <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Main Menu</p>
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
             <Link 
               key={item.href} 
@@ -73,6 +89,28 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {recentDrafts && recentDrafts.length > 0 && (
+          <div className="pt-8 px-4 space-y-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <History className="w-3 h-3" /> Recent Activity
+            </p>
+            <div className="space-y-2">
+              {recentDrafts.map(draft => (
+                <Link 
+                  key={draft.id} 
+                  href={`/dashboard/strategist?draftId=${draft.id}`}
+                  className="block p-3 rounded-xl bg-muted/30 hover:bg-[#FF671F]/5 transition-colors group"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-bold text-[#004B40] truncate">{draft.title}</p>
+                    <ArrowUpRight className="w-3 h-3 text-[#FF671F] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       <div className="p-6">

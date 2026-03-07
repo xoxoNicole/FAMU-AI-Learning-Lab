@@ -5,10 +5,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NicoleChat } from '@/components/strategist/NicoleChat';
-import { ChevronLeft, Play, CheckCircle, Loader2, Sparkles, BookOpen } from 'lucide-react';
+import { ChevronLeft, Play, CheckCircle, Loader2, Sparkles, BookOpen, LayoutGrid } from 'lucide-react';
 import { useFirestore, useDoc, useUser } from '@/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 export default function ModulePage() {
   const params = useParams();
@@ -96,13 +97,17 @@ export default function ModulePage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      {/* Top Bar */}
-      <header className="h-20 border-b border-[#004B40]/10 px-6 flex items-center justify-between bg-white/60 backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-[#004B40]/5">
-            <ChevronLeft className="w-6 h-6 text-[#004B40]" />
-          </Button>
+    <div className="h-full flex flex-col bg-background">
+      {/* Top Bar - Contextual Smart Nav */}
+      <header className="h-20 border-b border-[#004B40]/10 px-8 flex items-center justify-between bg-white/60 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard/modules">
+            <Button variant="ghost" className="rounded-xl h-12 px-4 hover:bg-[#004B40]/5 text-[#004B40] font-bold gap-2">
+              <LayoutGrid className="w-4 h-4 text-[#FF671F]" />
+              <span className="hidden sm:inline">All Modules</span>
+            </Button>
+          </Link>
+          <div className="h-8 w-px bg-muted hidden sm:block" />
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.2em]">Institutional Unit Session</span>
