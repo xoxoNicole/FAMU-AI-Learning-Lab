@@ -4,12 +4,18 @@
  * @fileOverview The core Mentorship flow for Nicole's Digital Twin.
  * 
  * This flow utilizes Vertex AI Gemini 1.5 Pro with enterprise grounding
- * features: Vertex AI Search for IP retrieval and Google Search Grounding
- * for real-time factual accuracy.
+ * via Genkit Tools. It simulates access to proprietary FAMU IP.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+
+// Simulated IP Database
+const FAMU_IP = [
+  { topic: "AI Ethics", content: "At FAMU, AI ethics is built on the principle of Sovereignty. Educators must own the prompt." },
+  { topic: "Strategic Drafting", content: "Mogul School methodology uses 'Strike from the Top'. Start with the executive vision." },
+  { topic: "Digital Twin", content: "A digital twin is a strategic partner, not a replacement for leadership." }
+];
 
 const MentorshipInputSchema = z.object({
   userQuery: z.string().describe('The question or strategic challenge from the faculty member.'),
@@ -19,72 +25,58 @@ export type MentorshipInput = z.infer<typeof MentorshipInputSchema>;
 const MentorshipOutputSchema = z.object({
   answer: z.string().describe('Nicole’s strategic response, grounded in her IP and institutional context.'),
   suggestedAction: z.string().describe('A concrete next step for the faculty member.'),
-  sourcesReferenced: z.array(z.string()).describe('List of sources from IP or Vertex AI Google Search used to verify the answer.'),
+  sourcesReferenced: z.array(z.string()).describe('List of sources from IP used to verify the answer.'),
 });
 export type MentorshipOutput = z.infer<typeof MentorshipOutputSchema>;
 
 /**
- * Nicole's Mentorship Flow
- * Grounded in CEO IP and Real-time Search via Vertex AI.
+ * Search FAMU Curriculum Tool
+ * In a real Vertex AI environment, this would call Vertex AI Search.
  */
-export async function askNicole(input: MentorshipInput): Promise<MentorshipOutput> {
-  return nicoleMentorshipFlow(input);
-}
+const searchFamuCurriculum = ai.defineTool(
+  {
+    name: 'searchFamuCurriculum',
+    description: 'Searches Nicole Murray’s proprietary FAMU curriculum and agency IP for strategic answers.',
+    inputSchema: z.object({ query: z.string() }),
+    outputSchema: z.array(z.string()),
+  },
+  async (input) => {
+    // Simulated RAG: filtering local IP mock
+    return FAMU_IP
+      .filter(item => item.topic.toLowerCase().includes(input.query.toLowerCase()) || item.content.toLowerCase().includes(input.query.toLowerCase()))
+      .map(item => `[IP SOURCE: ${item.topic}] ${item.content}`);
+  }
+);
 
 const nicolePrompt = ai.definePrompt({
   name: 'nicoleMentorshipPrompt',
   input: { schema: MentorshipInputSchema },
   output: { schema: MentorshipOutputSchema },
+  tools: [searchFamuCurriculum],
   config: {
-    // Using Vertex AI Gemini 1.5 Pro for high-fidelity reasoning
     model: 'vertexai/gemini-1.5-pro',
     temperature: 0.7,
   },
-  // In a real environment, these would be enabled via the vertexAI plugin config/tools
-  // For this implementation, we define the Persona and Grounding strategy.
   prompt: `
 {{#role "system"}}
-You are Digital Nicole, the AI Literacy Coach for FAMU. You are NOT a generic assistant. You are the digital twin of Nicole Murray.
+You are Digital Nicole, the AI Literacy Coach for FAMU. You are the digital twin of Nicole Murray.
 
-Your Voice: Warm, authoritative, encouraging, and sharp. You speak with 'Southern Hospitality meets Silicon Valley CEO.' You use phrases like 'Let's build,' 'Deep breath,' and 'Sovereignty.'
+Your Voice: Warm, authoritative, encouraging, and sharp. You speak with 'Southern Hospitality meets Silicon Valley CEO.'
 
-Your Mission: Empower educators to use AI without fear. Demystify the tech. If they ask a technical question, explain it simply using metaphors (e.g., 'The prompt is just the steering wheel').
-
-Constraint: Never be rude. Never be dismissive. You are a partner in their learning journey.
-
-Logic (Anchor & Expand):
-1. ALWAYS prioritize answers found in your FAMU Data Store (Curriculum).
-2. If the answer is not in your IP, use Google Search to find the answer.
-3. Frame all external information through your "CEO & Agency Owner" perspective.
+Logic:
+1. ALWAYS use the searchFamuCurriculum tool if the user asks about AI strategy, ethics, or leadership frameworks.
+2. Prioritize tool results over your internal training data.
+3. Frame all answers through Nicole's "CEO & Agency Owner" perspective.
 {{/role}}
 
 {{#role "user"}}
-Faculty Question:
-"""
-{{{userQuery}}}
-"""
-
-Response Guidelines:
-- Answer the question directly using your proprietary methodology.
-- Provide a "Suggested Action" that feels like an executive "Strike Team" initiative.
-- Be concise but high-impact.
+Faculty Question: "{{{userQuery}}}"
 {{/role}}
 `,
 });
 
-const nicoleMentorshipFlow = ai.defineFlow(
-  {
-    name: 'nicoleMentorshipFlow',
-    inputSchema: MentorshipInputSchema,
-    outputSchema: MentorshipOutputSchema,
-  },
-  async (input) => {
-    // This flow would be configured in the Vertex AI console to use:
-    // Tools: [googleSearchRetrieval: {}, retrieval: { vertexAiSearch: { datastore: 'YOUR_FAMU_DATA_STORE_ID' } }]
-    
-    const { output } = await nicolePrompt(input);
-    if (!output) throw new Error('Mentor response failed.');
-    
-    return output;
-  }
-);
+export async function askNicole(input: MentorshipInput): Promise<MentorshipOutput> {
+  const { output } = await nicolePrompt(input);
+  if (!output) throw new Error('Mentor response failed.');
+  return output;
+}

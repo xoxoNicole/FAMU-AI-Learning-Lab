@@ -9,10 +9,9 @@ import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lu
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
-import { doc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +26,6 @@ export default function LoginPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  // Memoize the license config reference
   const licenseRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'system', 'license');
@@ -35,7 +33,6 @@ export default function LoginPage() {
 
   const { data: licenseConfig, isLoading: licenseLoading } = useDoc(licenseRef);
 
-  // Handle successful login/signup redirect
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -58,27 +55,45 @@ export default function LoginPage() {
           toast({
             variant: "destructive",
             title: "License Capacity Reached",
-            description: "No more faculty licenses are available at this time. Please contact the administrator."
+            description: "No more faculty licenses are available. Contact the administrator."
           });
           setLoading(false);
           return;
         }
 
-        // We wrap the auth call. In a real app, we'd handle the profile creation in an auth listener 
-        // to ensure it happens after signup.
-        initiateEmailSignUp(auth, email, password);
-        
-        // Optimistically set profile data (ideally this is in a listener or Cloud Function)
-        // For the prototype, we assume the signup creates the user record next.
-        // The onAuthStateChanged will handle the redirect.
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await updateProfile(user, {
+          displayName: `${firstName} ${lastName}`
+        });
+
+        // Create the Profile in Firestore
+        await setDoc(doc(db, 'userProfiles', user.uid), {
+          id: user.uid,
+          email: user.email,
+          firstName,
+          lastName,
+          role: 'faculty', // Default to faculty
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+
+        // Increment License Count
+        await updateDoc(doc(db, 'system', 'license'), {
+          activeLicenses: increment(1),
+          updatedAt: new Date().toISOString()
+        });
+
+        toast({ title: "License Registered", description: "Welcome to the Strategic AI Lab." });
       } else {
-        initiateEmailSignIn(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: err.message || "Failed to authenticate. Please check your credentials."
+        description: err.message || "Failed to authenticate."
       });
       setLoading(false);
     }
@@ -100,7 +115,7 @@ export default function LoginPage() {
 
       <div className="z-10 w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3 animate-pulse">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter">AI Literacy Lab</h1>
@@ -114,9 +129,7 @@ export default function LoginPage() {
               {isSignUp ? 'Apply for License' : 'Faculty Access'}
             </CardTitle>
             <CardDescription>
-              {isSignUp 
-                ? 'Join the strategic laboratory for innovation.' 
-                : 'Enter your credentials to enter the lab.'}
+              {isSignUp ? 'Join the strategic laboratory for innovation.' : 'Enter your credentials to enter the lab.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -125,7 +138,7 @@ export default function LoginPage() {
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div className="text-xs font-medium">
                   <p className="font-bold uppercase tracking-wider mb-1">Waitlist Active</p>
-                  All initial licenses are currently provisioned. Contact your administrator to request additional access.
+                  All licenses are provisioned. Contact your administrator.
                 </div>
               </div>
             )}
@@ -163,7 +176,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="firstname.lastname@famu.edu" 
+                  placeholder="name@famu.edu" 
                   className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
                 />
               </div>
@@ -182,7 +195,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 disabled={loading || (isSignUp && licensesRemaining <= 0)}
-                className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4 transition-transform active:scale-95"
+                className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register License</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
               </Button>
@@ -211,10 +224,6 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
-
-        <p className="text-center text-white/40 text-[9px] font-bold uppercase tracking-[0.3em] mt-8">
-          Strike from the Top • Powered by Vertex AI
-        </p>
       </div>
     </div>
   );
