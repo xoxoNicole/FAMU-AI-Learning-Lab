@@ -11,10 +11,12 @@ import {
   FileText, 
   LogOut,
   Target,
-  Video,
   UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
@@ -27,13 +29,22 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+      router.push('/login');
+    }
+  };
 
   return (
-    <div className="w-72 h-full bg-white border-r border-muted flex flex-col shadow-sm">
+    <div className="w-72 h-full bg-white border-r border-muted flex flex-col shadow-sm shrink-0 z-40">
       <div className="p-8 pb-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#004B40] flex items-center justify-center shadow-lg transform -rotate-3">
-            <Sparkles className="w-6 h-6 text-white" />
+            <Sparkles className="w-6 h-6 text-[#FF671F]" />
           </div>
           <div>
             <span className="text-xl font-headline font-bold text-[#004B40] tracking-tighter block leading-none">AI Lab</span>
@@ -67,12 +78,15 @@ export function Sidebar() {
       <div className="p-6">
         <div className="p-4 rounded-3xl bg-muted/50 border border-muted space-y-3">
           <p className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-wider">Session Security</p>
-          <div className="flex items-center gap-3 px-1 py-1 text-muted-foreground hover:text-destructive cursor-pointer transition-colors group">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-1 py-1 text-muted-foreground hover:text-destructive cursor-pointer transition-colors group"
+          >
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-destructive/10">
               <LogOut className="w-4 h-4" />
             </div>
             <span className="font-bold text-xs uppercase tracking-widest">Logout</span>
-          </div>
+          </button>
         </div>
       </div>
     </div>

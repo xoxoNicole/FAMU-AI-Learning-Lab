@@ -1,19 +1,23 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NicoleChat } from '@/components/strategist/NicoleChat';
 import { ChevronLeft, Play, CheckCircle, Loader2, Sparkles, BookOpen } from 'lucide-react';
-import { useFirestore, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useUser } from '@/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ModulePage() {
   const params = useParams();
   const router = useRouter();
   const db = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
   const [videoStarted, setVideoStarted] = useState(false);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   const moduleId = params.id as string;
   const moduleRef = React.useMemo(() => {
@@ -22,6 +26,59 @@ export default function ModulePage() {
   }, [db, moduleId]);
 
   const { data: module, isLoading } = useDoc(moduleRef);
+
+  // Auto-record progress when opening module
+  useEffect(() => {
+    if (db && user && moduleId) {
+      const progressId = moduleId; // Simplified mapping
+      const progressRef = doc(db, 'userProfiles', user.uid, 'moduleProgress', progressId);
+      
+      // Check if progress already exists
+      getDoc(progressRef).then(snap => {
+        if (!snap.exists()) {
+          setDoc(progressRef, {
+            id: progressId,
+            userId: user.uid,
+            moduleId: moduleId,
+            isCompleted: false,
+            lastAccessedAt: new Date().toISOString(),
+            progressPercentage: 10,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+        } else {
+          setDoc(progressRef, {
+            lastAccessedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+      });
+    }
+  }, [db, user, moduleId]);
+
+  const handleComplete = async () => {
+    if (!db || !user || !moduleId) return;
+    setIsMarkingComplete(true);
+    try {
+      const progressRef = doc(db, 'userProfiles', user.uid, 'moduleProgress', moduleId);
+      await setDoc(progressRef, {
+        isCompleted: true,
+        completionDate: new Date().toISOString(),
+        progressPercentage: 100,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      
+      toast({ 
+        title: "Module Mastery Achieved", 
+        description: `You have successfully completed ${module?.title}.` 
+      });
+      router.push('/modules');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsMarkingComplete(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -43,22 +100,27 @@ export default function ModulePage() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar */}
-      <header className="h-16 border-b border-white/20 px-6 flex items-center justify-between bg-white/40 backdrop-blur-md">
+      <header className="h-20 border-b border-[#004B40]/10 px-6 flex items-center justify-between bg-white/60 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-            <ChevronLeft className="w-5 h-5" />
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-[#004B40]/5">
+            <ChevronLeft className="w-6 h-6 text-[#004B40]" />
           </Button>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-widest">Module Session</span>
-              <span className="bg-[#004B40]/10 text-[#004B40] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">{module.difficulty}</span>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.2em]">Institutional Unit Session</span>
+              <span className="bg-[#004B40]/10 text-[#004B40] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">{module.difficulty || 'Core'}</span>
             </div>
-            <h1 className="font-headline font-bold text-[#004B40] leading-none">{module.title}</h1>
+            <h1 className="font-headline font-bold text-2xl text-[#004B40] leading-none tracking-tight">{module.title}</h1>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="border-[#FF671F]/20 text-[#FF671F] hover:bg-[#FF671F]/5 rounded-xl font-bold">
-            <CheckCircle className="w-4 h-4 mr-2" /> Mark Complete
+          <Button 
+            onClick={handleComplete}
+            disabled={isMarkingComplete}
+            className="bg-[#004B40] hover:bg-[#004B40]/90 text-white rounded-xl font-bold h-12 px-6 shadow-lg shadow-green-900/10"
+          >
+            {isMarkingComplete ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2 text-[#FF671F]" />}
+            Mark Mastery
           </Button>
         </div>
       </header>
@@ -66,17 +128,17 @@ export default function ModulePage() {
       {/* Split Screen Lab */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Video & Content */}
-        <div className="w-1/2 p-8 overflow-y-auto border-r border-white/20 bg-white/10">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl group bg-black">
+        <div className="w-1/2 p-10 overflow-y-auto border-r border-[#004B40]/10 bg-[#004B40]/5 custom-scrollbar">
+          <div className="max-w-3xl mx-auto space-y-10">
+            <div className="relative aspect-video rounded-[2.5rem] overflow-hidden shadow-2xl group bg-black border-4 border-white">
               {!videoStarted ? (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <div className="absolute inset-0 bg-[#004B40]/40" />
+                  <div className="absolute inset-0 bg-[#004B40]/40 backdrop-blur-sm" />
                   <Button 
                     onClick={() => setVideoStarted(true)}
-                    className="w-20 h-20 rounded-full bg-white text-[#004B40] hover:scale-110 transition-transform shadow-2xl z-20"
+                    className="w-24 h-24 rounded-full bg-white text-[#004B40] hover:scale-110 transition-transform shadow-2xl z-20"
                   >
-                    <Play className="w-8 h-8 fill-current" />
+                    <Play className="w-10 h-10 fill-current ml-1" />
                   </Button>
                 </div>
               ) : (
@@ -91,29 +153,29 @@ export default function ModulePage() {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-[0.2em] text-[10px]">
-                <BookOpen className="w-3.5 h-3.5" /> Unit Intelligence
+              <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-[0.3em] text-[10px]">
+                <BookOpen className="w-4 h-4" /> Curriculum Intelligence
               </div>
-              <h2 className="text-4xl font-headline font-bold text-[#004B40] tracking-tight">{module.title}</h2>
+              <h2 className="text-4xl font-headline font-bold text-[#004B40] tracking-tight leading-tight">{module.title}</h2>
               <div className="prose prose-green text-lg leading-relaxed text-muted-foreground font-medium">
                 {module.description}
               </div>
 
-              <div className="bg-[#004B40]/5 p-8 rounded-[2rem] border border-[#004B40]/10 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF671F]/5 rounded-full translate-x-1/2 -translate-y-1/2" />
-                <h4 className="font-bold text-[#004B40] mb-3 flex items-center gap-2 uppercase tracking-widest text-xs">
-                  <Sparkles className="w-4 h-4 text-[#FF671F]" /> Active Lab Task
+              <Card className="bg-white border-none p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF671F]/5 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform" />
+                <h4 className="font-bold text-[#004B40] mb-4 flex items-center gap-2 uppercase tracking-widest text-[10px]">
+                  <Sparkles className="w-4 h-4 text-[#FF671F]" /> Active Strategic Objective
                 </h4>
-                <p className="text-primary/90 font-medium leading-relaxed italic">
-                  "{module.labTask || 'Use the AI Lab on the right to draft a strategic brief for this module.'}"
+                <p className="text-[#004B40] font-bold text-xl leading-relaxed italic border-l-4 border-[#FF671F] pl-6">
+                  "{module.labTask || 'Draft a strategic brief for this unit using the AI Lab.'}"
                 </p>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
 
         {/* Right: AI Strategist Lab */}
-        <div className="w-1/2 flex flex-col p-8 bg-white/40">
+        <div className="w-1/2 flex flex-col p-10 bg-white/40">
           <NicoleChat />
         </div>
       </div>

@@ -17,7 +17,8 @@ import {
   Save,
   Loader2,
   FileText,
-  Check
+  Check,
+  History
 } from 'lucide-react';
 import { generateStrategicContent } from '@/ai/flows/generate-strategic-content';
 import { challengeAssumptionsAndFeedback } from '@/ai/flows/challenge-assumptions-and-feedback';
@@ -25,7 +26,8 @@ import { refineContentWithAI } from '@/ai/flows/refine-content-with-ai';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useSearchParams } from 'next/navigation';
 
 export function NicoleChat() {
@@ -43,22 +45,34 @@ export function NicoleChat() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get('draftId');
 
-  // Load draft if ID is present
   useEffect(() => {
     async function loadDraft() {
       if (draftId && db && user) {
-        const draftRef = doc(db, 'users', user.uid, 'drafts', draftId);
+        const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
         const snap = await getDoc(draftRef);
         if (snap.exists()) {
           const data = snap.data();
-          setOutput(data.content);
-          setTone([data.tone || 50]);
+          setOutput(data.content || '');
+          setTone([data.currentToneSetting === 'visionary' ? 80 : data.currentToneSetting === 'academic' ? 20 : 50]);
           setInput(data.title || '');
         }
       }
     }
     loadDraft();
   }, [draftId, db, user]);
+
+  const saveRevision = (content: string, description: string, isAISuggested: boolean = false) => {
+    if (!draftId || !db || !user) return;
+    
+    const revisionRef = collection(db, 'userProfiles', user.uid, 'outputs', draftId, 'revisions');
+    addDocumentNonBlocking(revisionRef, {
+      outputId: draftId,
+      content,
+      appliedRefinementDescription: description,
+      refinementTimestamp: new Date().toISOString(),
+      isAISuggested
+    });
+  };
 
   const handleGenerate = async () => {
     if (!input.trim()) return;
@@ -68,6 +82,11 @@ export function NicoleChat() {
       const res = await generateStrategicContent({ request: input });
       setOutput(res.draft);
       toast({ title: "Draft Generated", description: "Your strategic content is ready for refinement." });
+      
+      // If we are already in a draft, save this as a major revision
+      if (draftId) {
+        saveRevision(res.draft, "Major re-generation from prompt", true);
+      }
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to generate content." });
     } finally {
@@ -79,31 +98,46 @@ export function NicoleChat() {
     if (!output || !db || !user) return;
     setSaving(true);
     try {
+      const toneValue = tone[0] > 70 ? 'visionary' : tone[0] < 30 ? 'academic' : 'professional';
+      
       if (draftId) {
-        // Update existing
-        const draftRef = doc(db, 'users', user.uid, 'drafts', draftId);
+        const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
         await updateDoc(draftRef, {
-          content: output,
-          updatedAt: new Date().toISOString(),
-          tone: tone[0]
+          title: input.substring(0, 50) || "Untitled Strategic Output",
+          status: 'draft',
+          currentToneSetting: toneValue,
+          updatedAt: new Date().toISOString()
         });
+        
+        // When user manually saves, we also create a manual revision snapshot
+        saveRevision(output, "Manual Save/Checkpoint");
       } else {
-        // Create new
-        const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Content";
-        await addDoc(collection(db, 'users', user.uid, 'drafts'), {
+        const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Output";
+        const docRef = await addDoc(collection(db, 'userProfiles', user.uid, 'outputs'), {
+          userId: user.uid,
           title: title,
-          content: output,
+          outputType: 'strategic memo',
+          status: 'draft',
+          initialPrompt: input,
+          currentToneSetting: toneValue,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          tone: tone[0],
-          type: "AI Draft"
+        });
+
+        // Add initial revision
+        await addDoc(collection(db, 'userProfiles', user.uid, 'outputs', docRef.id, 'revisions'), {
+          outputId: docRef.id,
+          content: output,
+          appliedRefinementDescription: "Initial AI Generation",
+          refinementTimestamp: new Date().toISOString(),
+          isAISuggested: true
         });
       }
       setSaveSuccess(true);
-      toast({ title: "Saved", description: "Your work has been saved to My Drafts." });
+      toast({ title: "Strategic Output Saved", description: "Successfully archived in your drafts." });
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save draft." });
+      toast({ variant: "destructive", title: "Error", description: "Failed to save output." });
     } finally {
       setSaving(false);
     }
@@ -115,7 +149,7 @@ export function NicoleChat() {
     try {
       const res = await challengeAssumptionsAndFeedback({ draftedContent: output });
       setFeedback(res);
-      toast({ title: "Analysis Complete", description: "The AI has identified areas for improvement." });
+      toast({ title: "Analysis Complete", description: "Strategic friction identified. Review the insights below." });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to analyze content." });
     } finally {
@@ -133,6 +167,7 @@ export function NicoleChat() {
         instructions: `Refine this content to be ${toneDescription}.` 
       });
       setOutput(res.refinedContent);
+      saveRevision(res.refinedContent, `AI Refinement: ${toneDescription}`, true);
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to refine content." });
     } finally {
@@ -140,113 +175,119 @@ export function NicoleChat() {
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(output);
-    toast({ title: "Copied", description: "Content copied to clipboard." });
-  };
-
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex-1 overflow-y-auto space-y-6 pr-4">
-        <Card className="glass-card p-6 border-none shadow-none bg-white/40">
+        <Card className="glass-card p-6 border-none shadow-none bg-[#004B40]/5">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-[#004B40] flex items-center justify-center shrink-0 shadow-lg">
+              <Sparkles className="w-6 h-6 text-[#FF671F]" />
             </div>
             <div className="flex-1">
-              <p className="font-headline font-bold text-primary mb-2">AI Literacy Lab</p>
-              <p className="text-muted-foreground leading-relaxed">
-                Describe the strategic content you need (e.g., "Draft a memo to the board about budget allocations for digital transformation").
+              <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-widest mb-1">Strategic AI Lab</p>
+              <p className="text-[#004B40] font-medium leading-relaxed">
+                Describe the strategic output we're building today. I'll help you find the clarity you need.
               </p>
             </div>
           </div>
         </Card>
 
         {output && (
-          <Card className="glass-card p-8 border-none shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="prose prose-blue max-w-none">
-              <h4 className="font-headline font-bold text-primary mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" /> {draftId ? 'Editing Draft' : 'Generated Draft'}
+          <Card className="glass-card p-8 border-none shadow-2xl rounded-[2.5rem] animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white relative">
+            <div className="absolute top-8 right-8 flex gap-2">
+              <Button variant="ghost" size="icon" className="rounded-full bg-muted/50 hover:bg-muted">
+                <History className="w-4 h-4 text-[#004B40]" />
+              </Button>
+            </div>
+            <div className="prose prose-green max-w-none">
+              <h4 className="text-xl font-headline font-bold text-[#004B40] mb-6 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#FF671F]" /> Active Strategic Brief
               </h4>
-              <div className="text-foreground leading-relaxed whitespace-pre-wrap font-body">
+              <div className="text-[#004B40] leading-relaxed whitespace-pre-wrap font-medium">
                 {output}
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-primary/5">
-              <Button onClick={copyToClipboard} variant="outline" size="sm" className="rounded-lg h-9">
-                <Copy className="w-4 h-4 mr-2" /> Copy
+            <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-muted">
+              <Button onClick={() => {
+                navigator.clipboard.writeText(output);
+                toast({ title: "Copied", description: "Strategy copied to clipboard." });
+              }} variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
+                <Copy className="w-4 h-4 mr-2" /> Copy text
               </Button>
-              <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "outline"} size="sm" className="rounded-lg h-9 transition-all">
+              <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "default"} className={cn("rounded-xl h-12 font-bold px-8 transition-all", saveSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-[#004B40] hover:bg-[#004B40]/90 text-white shadow-xl shadow-green-900/10")}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                {saveSuccess ? "Saved!" : "Save to My Drafts"}
+                {saveSuccess ? "Archived!" : draftId ? "Save Changes" : "Save to Repository"}
               </Button>
-              <Button variant="outline" size="sm" className="rounded-lg h-9">
-                <Download className="w-4 h-4 mr-2" /> PDF
+              <Button variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
+                <Download className="w-4 h-4 mr-2" /> Export PDF
               </Button>
             </div>
           </Card>
         )}
 
         {feedback && (
-          <Card className="glass-card p-6 border-none bg-accent/5 animate-in zoom-in-95">
-            <h4 className="font-headline font-bold text-accent mb-4 flex items-center gap-2">
-              <Lightbulb className="w-5 h-5" /> Strategic Insights
+          <Card className="border-none bg-[#FF671F]/5 rounded-[2.5rem] p-8 animate-in zoom-in-95 border border-[#FF671F]/10">
+            <h4 className="text-xl font-headline font-bold text-[#FF671F] mb-6 flex items-center gap-2">
+              <Lightbulb className="w-6 h-6" /> Strategic Friction Points
             </h4>
-            <div className="space-y-4 text-sm leading-relaxed">
-              <div>
-                <p className="font-bold text-primary mb-1">Identified Weaknesses:</p>
-                <p className="text-muted-foreground">{feedback.identifiedWeaknesses}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Structural Weaknesses</p>
+                <p className="text-[#004B40] font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
+                  {feedback.identifiedWeaknesses}
+                </p>
               </div>
-              <div>
-                <p className="font-bold text-primary mb-1">Alternative Perspectives:</p>
-                <p className="text-muted-foreground">{feedback.alternativePerspectives}</p>
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Alternative Perspectives</p>
+                <p className="text-[#004B40] font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
+                  {feedback.alternativePerspectives}
+                </p>
               </div>
             </div>
           </Card>
         )}
       </div>
 
-      <div className="space-y-4 bg-white/60 backdrop-blur-xl p-6 rounded-3xl border border-white/40 shadow-xl">
-        <div className="flex gap-2">
+      <div className="space-y-4 bg-white p-6 rounded-[2rem] border border-[#004B40]/10 shadow-2xl shadow-green-900/10">
+        <div className="flex gap-3">
           <Textarea 
-            placeholder="What should we draft together?" 
-            className="flex-1 bg-white border-none rounded-2xl h-24 focus-visible:ring-accent"
+            placeholder="What should we refine or draft next?" 
+            className="flex-1 bg-muted/30 border-none rounded-2xl h-28 focus-visible:ring-[#FF671F] font-medium text-[#004B40]"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
           <Button 
             onClick={handleGenerate} 
             disabled={loading || !input}
-            className="h-24 w-16 bg-primary hover:bg-primary/90 rounded-2xl shrink-0"
+            className="h-28 w-16 bg-[#004B40] hover:bg-[#004B40]/90 text-white rounded-2xl shrink-0 shadow-lg"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
           </Button>
         </div>
 
         {output && (
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-6">
-              <div className="flex-1 space-y-2">
-                <div className="flex justify-between text-xs font-bold text-primary uppercase">
-                  <span>Tone: Academic</span>
-                  <span>Visionary</span>
+          <div className="space-y-6 pt-4 border-t border-muted">
+            <div className="flex items-center gap-8">
+              <div className="flex-1 space-y-3">
+                <div className="flex justify-between text-[10px] font-bold text-[#004B40] uppercase tracking-widest">
+                  <span className="flex items-center gap-1"><History className="w-3 h-3" /> Academic</span>
+                  <span className="flex items-center gap-1">Visionary <Sparkles className="w-3 h-3" /></span>
                 </div>
                 <Slider 
                   value={tone} 
                   onValueChange={setTone} 
                   max={100} 
                   step={1} 
-                  className="[&_[role=slider]]:bg-accent [&_[role=slider]]:border-white"
+                  className="[&_[role=slider]]:bg-[#FF671F] [&_[role=slider]]:border-white"
                 />
               </div>
               <Button 
                 onClick={handleRefine}
                 disabled={loading}
-                variant="secondary" 
-                className="bg-accent/10 hover:bg-accent/20 text-accent rounded-xl"
+                className="bg-[#FF671F]/10 hover:bg-[#FF671F]/20 text-[#FF671F] rounded-xl font-bold h-12"
               >
-                <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} /> Refine Tone
+                <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} /> Apply Tone Slider
               </Button>
             </div>
             
@@ -254,7 +295,7 @@ export function NicoleChat() {
               <Button 
                 onClick={handleChallenge}
                 disabled={loading}
-                className="flex-1 h-12 bg-accent hover:bg-accent/90 text-white rounded-xl font-headline"
+                className="flex-1 h-14 bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10"
               >
                 <ArrowRightLeft className="w-5 h-5 mr-2" /> Challenge My Assumptions
               </Button>
