@@ -7,16 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, doc } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap } from 'lucide-react';
+import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap, ShieldCheck, TrendingUp, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CurriculumManager() {
   const db = useFirestore();
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [newTotalLicenses, setNewTotalLicenses] = useState<string>('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -28,6 +29,30 @@ export default function CurriculumManager() {
     labTask: '',
     difficulty: 'Foundational'
   });
+
+  // License Management
+  const licenseRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'system', 'license');
+  }, [db]);
+  const { data: licenseConfig } = useDoc(licenseRef);
+
+  const handleUpdateLicenses = async () => {
+    if (!db || !newTotalLicenses) return;
+    const val = parseInt(newTotalLicenses);
+    if (isNaN(val)) return;
+
+    try {
+      await updateDoc(doc(db, 'system', 'license'), {
+        totalLicenses: val,
+        updatedAt: new Date().toISOString()
+      });
+      toast({ title: "Licensing Provisioned", description: `Updated to ${val} total faculty licenses.` });
+      setNewTotalLicenses('');
+    } catch (err) {
+      toast({ variant: "destructive", title: "Update Failed", description: "You may not have administrative permissions for this action." });
+    }
+  };
 
   const modulesQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -77,8 +102,8 @@ export default function CurriculumManager() {
       <header className="flex justify-between items-end">
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em]">Administration Terminal</p>
-          <h1 className="text-4xl font-headline font-bold text-[#004B40]">Curriculum Lab</h1>
-          <p className="text-muted-foreground font-medium">Design and deploy strategic learning units for the faculty body.</p>
+          <h1 className="text-4xl font-headline font-bold text-[#004B40]">Strategic Control</h1>
+          <p className="text-muted-foreground font-medium">Manage curriculum and provision institutional AI licenses.</p>
         </div>
         <Button 
           onClick={() => setShowForm(!showForm)}
@@ -87,6 +112,43 @@ export default function CurriculumManager() {
           {showForm ? <><X className="w-4 h-4 mr-2" /> Cancel</> : <><Plus className="w-4 h-4 mr-2" /> New Module</>}
         </Button>
       </header>
+
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-[#004B40] text-white border-none rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform" />
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <Users className="w-6 h-6 text-[#FF671F]" />
+              <span className="text-[9px] font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">Institutional Licenses</span>
+            </div>
+            <div>
+              <p className="text-3xl font-headline font-bold">{licenseConfig?.activeLicenses || 0} / {licenseConfig?.totalLicenses || 3}</p>
+              <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">Active Faculty Accounts</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="bg-white border-none rounded-[2rem] p-6 shadow-sm border border-muted/50 col-span-2 flex items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h3 className="font-bold text-[#004B40] flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#FF671F]" /> Provision Licenses
+            </h3>
+            <p className="text-xs text-muted-foreground font-medium">Update the total number of faculty accounts permitted.</p>
+          </div>
+          <div className="flex gap-3">
+            <Input 
+              type="number" 
+              placeholder="e.g. 10" 
+              value={newTotalLicenses}
+              onChange={e => setNewTotalLicenses(e.target.value)}
+              className="w-24 h-12 rounded-xl bg-muted/30 border-none font-bold"
+            />
+            <Button onClick={handleUpdateLicenses} className="h-12 px-6 rounded-xl bg-[#004B40] text-white font-bold hover:bg-[#004B40]/90">
+              Update Cap
+            </Button>
+          </div>
+        </Card>
+      </section>
 
       {showForm && (
         <Card className="border-none shadow-2xl rounded-[2.5rem] animate-in slide-in-from-top-4 duration-500 overflow-hidden bg-white">

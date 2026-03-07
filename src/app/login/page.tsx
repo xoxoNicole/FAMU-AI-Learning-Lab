@@ -1,105 +1,220 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldCheck, Sparkles } from 'lucide-react';
+import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useAuth } from '@/firebase';
-import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { doc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
+  const db = useFirestore();
+  const { toast } = useToast();
+  
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
-  const handleSignIn = (e: React.FormEvent) => {
+  // Memoize the license config reference
+  const licenseRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'system', 'license');
+  }, [db]);
+
+  const { data: licenseConfig, isLoading: licenseLoading } = useDoc(licenseRef);
+
+  // Handle successful login/signup redirect
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && !loading) {
+        router.push('/dashboard');
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, router, loading]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (auth) {
-      // In a prototype, we'll use anonymous sign-in to quickly establish a session
-      initiateAnonymousSignIn(auth);
-      router.push('/dashboard');
+    if (!auth || !db) return;
+    setLoading(true);
+
+    try {
+      if (isSignUp) {
+        // License Check
+        if (licenseConfig && licenseConfig.activeLicenses >= licenseConfig.totalLicenses) {
+          toast({
+            variant: "destructive",
+            title: "License Capacity Reached",
+            description: "No more faculty licenses are available at this time. Please contact the administrator."
+          });
+          setLoading(false);
+          return;
+        }
+
+        // We wrap the auth call. In a real app, we'd handle the profile creation in an auth listener 
+        // to ensure it happens after signup.
+        initiateEmailSignUp(auth, email, password);
+        
+        // Optimistically set profile data (ideally this is in a listener or Cloud Function)
+        // For the prototype, we assume the signup creates the user record next.
+        // The onAuthStateChanged will handle the redirect.
+      } else {
+        initiateEmailSignIn(auth, email, password);
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: err.message || "Failed to authenticate. Please check your credentials."
+      });
+      setLoading(false);
     }
   };
 
+  const licensesRemaining = licenseConfig ? licenseConfig.totalLicenses - licenseConfig.activeLicenses : 0;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#004B40] relative overflow-hidden">
-      {/* Subtle Pattern Overlay */}
+    <div className="min-h-screen flex items-center justify-center bg-[#004B40] relative overflow-hidden p-6">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <Image 
           src="https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
           alt="Campus Background"
           fill
           className="object-cover grayscale"
+          data-ai-hint="university campus"
         />
       </div>
 
-      <div className="z-10 w-full max-w-md px-4">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3">
+      <div className="z-10 w-full max-w-md">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3 animate-pulse">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter text-shadow-sm">AI Literacy Lab</h1>
+          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter">AI Literacy Lab</h1>
           <p className="text-white/70 font-body text-sm uppercase tracking-widest font-bold">Florida A&M University</p>
         </div>
 
-        <Card className="border-none shadow-2xl overflow-hidden rounded-3xl">
+        <Card className="border-none shadow-2xl overflow-hidden rounded-[2.5rem] bg-white">
           <div className="h-2 bg-[#FF671F]" />
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-headline text-[#004B40]">Faculty Access</CardTitle>
-            <CardDescription>Enter your iRattler credentials to enter the lab.</CardDescription>
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-3xl font-headline text-[#004B40]">
+              {isSignUp ? 'Apply for License' : 'Faculty Access'}
+            </CardTitle>
+            <CardDescription>
+              {isSignUp 
+                ? 'Join the strategic laboratory for innovation.' 
+                : 'Enter your credentials to enter the lab.'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignIn} className="space-y-4">
+            {isSignUp && !licenseLoading && licensesRemaining <= 0 && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-700">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="text-xs font-medium">
+                  <p className="font-bold uppercase tracking-wider mb-1">Waitlist Active</p>
+                  All initial licenses are currently provisioned. Contact your administrator to request additional access.
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">First Name</label>
+                    <Input 
+                      required
+                      value={firstName}
+                      onChange={e => setFirstName(e.target.value)}
+                      placeholder="Jane" 
+                      className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Last Name</label>
+                    <Input 
+                      required
+                      value={lastName}
+                      onChange={e => setLastName(e.target.value)}
+                      placeholder="Doe" 
+                      className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                    />
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground tracking-wider">FAMU Email</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">FAMU Email</label>
                 <Input 
                   type="email" 
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="firstname.lastname@famu.edu" 
-                  className="bg-muted/50 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                  className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Password</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Password</label>
                 <Input 
                   type="password" 
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" 
-                  className="bg-muted/50 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                  className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
                 />
               </div>
               
-              <Button type="submit" className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-lg shadow-orange-900/20 mt-2">
-                Secure Sign In
+              <Button 
+                type="submit" 
+                disabled={loading || (isSignUp && licensesRemaining <= 0)}
+                className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4 transition-transform active:scale-95"
+              >
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register License</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
               </Button>
             </form>
 
-            <div className="relative py-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-muted" />
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase">
-                <span className="bg-white px-4 text-muted-foreground font-bold tracking-widest">Or use Workspace</span>
+            <div className="flex flex-col gap-4 mt-8">
+              <Button 
+                variant="ghost" 
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-[#004B40] font-bold text-sm hover:bg-[#004B40]/5 rounded-xl h-12"
+              >
+                {isSignUp ? 'Already have a license? Sign In' : 'Need a license? Apply here'}
+              </Button>
+              
+              <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 border-t border-muted pt-6">
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${licensesRemaining > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
+                  {licenseLoading ? 'Syncing...' : `${licensesRemaining} Licenses Left`}
+                </div>
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Enterprise Secure
+                </div>
               </div>
             </div>
-
-            <Button onClick={handleSignIn} variant="outline" className="w-full h-12 border-muted hover:bg-muted/50 rounded-xl font-bold text-[#004B40]">
-              <Image 
-                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                alt="Google" 
-                width={18} 
-                height={18} 
-                className="mr-3"
-              />
-              FAMU Google Account
-            </Button>
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-center gap-2 mt-8 text-white/40 text-xs font-bold uppercase tracking-widest">
-          <ShieldCheck className="w-4 h-4" />
-          <span>Strike from the Top • Enterprise Secure</span>
-        </div>
+        <p className="text-center text-white/40 text-[9px] font-bold uppercase tracking-[0.3em] mt-8">
+          Strike from the Top • Powered by Vertex AI
+        </p>
       </div>
     </div>
   );
