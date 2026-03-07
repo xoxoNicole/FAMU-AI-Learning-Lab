@@ -93,7 +93,7 @@ export default function Dashboard() {
             <p className="text-white/80 max-w-sm font-medium mb-8">
               Bypass the blank page. Use the lab to draft a comprehensive institutional plan for your department.
             </p>
-            <Link href="/modules">
+            <Link href="/dashboard/modules">
               <Button className="h-14 px-10 bg-white text-[#004B40] hover:bg-white/90 rounded-2xl font-headline font-bold shadow-2xl">
                 Start Learning
               </Button>
@@ -106,7 +106,7 @@ export default function Dashboard() {
             <h3 className="text-xl font-headline font-bold text-[#004B40] flex items-center gap-3">
               <FileText className="w-6 h-6 text-[#FF671F]" /> Recent Drafts
             </h3>
-            <Link href="/drafts" className="text-xs font-bold text-[#FF671F] hover:underline uppercase tracking-widest">
+            <Link href="/dashboard/drafts" className="text-xs font-bold text-[#FF671F] hover:underline uppercase tracking-widest">
               View All
             </Link>
           </div>
@@ -115,7 +115,7 @@ export default function Dashboard() {
               <div className="text-sm text-muted-foreground italic">Syncing with lab storage...</div>
             ) : recentDrafts && recentDrafts.length > 0 ? (
               recentDrafts.map(draft => (
-                <Link key={draft.id} href={`/strategist?draftId=${draft.id}`}>
+                <Link key={draft.id} href={`/dashboard/strategist?draftId=${draft.id}`}>
                   <div className="p-5 rounded-[1.5rem] bg-muted/40 hover:bg-[#004B40]/5 transition-all cursor-pointer border border-transparent hover:border-[#004B40]/10 group">
                     <p className="font-bold text-[#004B40] truncate text-sm group-hover:text-[#FF671F] transition-colors">{draft.title}</p>
                     <div className="flex items-center gap-2 mt-2">
@@ -137,7 +137,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <Link href="/strategist" className="mt-6">
+          <Link href="/dashboard/strategist" className="mt-6">
             <Button variant="outline" className="w-full h-12 rounded-2xl border-[#004B40]/10 text-[#004B40] font-bold">
               <Sparkles className="w-4 h-4 mr-2 text-[#FF671F]" /> Open AI Lab
             </Button>
@@ -148,7 +148,7 @@ export default function Dashboard() {
       <section className="space-y-8">
         <div className="flex items-center justify-between border-b border-muted pb-4">
           <h3 className="text-3xl font-headline font-bold text-[#004B40]">Active Curriculum</h3>
-          <Link href="/modules" className="text-[#FF671F] font-bold uppercase tracking-widest text-xs hover:underline">Complete Catalog</Link>
+          <Link href="/dashboard/modules" className="text-[#FF671F] font-bold uppercase tracking-widest text-xs hover:underline">Complete Catalog</Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {modules.map((module) => (
@@ -172,7 +172,7 @@ export default function Dashboard() {
                     </div>
                     <Progress value={module.progress} className="h-2 bg-muted rounded-full" />
                   </div>
-                  <Link href={`/modules`} className="block">
+                  <Link href={`/dashboard/modules`} className="block">
                     <Button className="w-full h-12 bg-[#004B40] hover:bg-[#004B40]/90 text-white font-bold rounded-2xl shadow-lg transition-all group-hover:shadow-green-900/20">
                       <PlayCircle className="w-4 h-4 mr-2" />
                       {module.progress === 100 ? 'Review Module' : 'Resume Lab'}

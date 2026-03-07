@@ -20,11 +20,11 @@ import { useRouter } from 'next/navigation';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
-  { icon: BookOpen, label: 'The Curriculum', href: '/modules' },
-  { icon: Sparkles, label: 'The Lab', href: '/strategist' },
-  { icon: FileText, label: 'My Drafts', href: '/drafts' },
+  { icon: BookOpen, label: 'The Curriculum', href: '/dashboard/modules' },
+  { icon: Sparkles, label: 'The Lab', href: '/dashboard/strategist' },
+  { icon: FileText, label: 'My Drafts', href: '/dashboard/drafts' },
   { icon: UserCheck, label: 'Talk to Nicole', href: '/dashboard/digital-twin' },
-  { icon: Target, label: 'Strategic Progress', href: '/progress' },
+  { icon: Target, label: 'Strategic Progress', href: '/dashboard/progress' },
 ];
 
 export function Sidebar() {

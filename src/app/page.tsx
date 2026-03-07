@@ -57,9 +57,11 @@ export default function LandingPage() {
                   Enter the Lab <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button variant="outline" className="h-16 px-10 rounded-2xl border-[#004B40]/20 bg-white text-[#004B40] text-lg font-headline font-bold hover:bg-muted">
-                View Curriculum
-              </Button>
+              <Link href="/login">
+                <Button variant="outline" className="h-16 px-10 rounded-2xl border-[#004B40]/20 bg-white text-[#004B40] text-lg font-headline font-bold hover:bg-muted">
+                  View Curriculum
+                </Button>
+              </Link>
             </div>
           </div>
 
