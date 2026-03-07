@@ -18,7 +18,7 @@ export default function ModulesListing() {
   // Fetch the current user profile to check for the 'admin' role
   const userProfileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return doc(db, 'users', user.uid);
+    return doc(db, 'userProfiles', user.uid);
   }, [db, user]);
 
   const { data: userProfile } = useDoc(userProfileRef);

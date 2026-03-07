@@ -46,7 +46,7 @@ export default function Dashboard() {
   const recentDraftsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
-      collection(db, 'users', user.uid, 'drafts'),
+      collection(db, 'userProfiles', user.uid, 'outputs'),
       orderBy('updatedAt', 'desc'),
       limit(3)
     );

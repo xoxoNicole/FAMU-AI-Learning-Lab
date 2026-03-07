@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useFirestore, useUser, useCollection } from '@/firebase';
+import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,25 +24,24 @@ export default function MyDraftsPage() {
   const db = useFirestore();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const draftsQuery = React.useMemo(() => {
+  const draftsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
-      collection(db, 'users', user.uid, 'drafts'),
+      collection(db, 'userProfiles', user.uid, 'outputs'),
       orderBy('createdAt', 'desc')
     );
   }, [db, user]);
 
-  const { data: drafts, loading } = useCollection(draftsQuery);
+  const { data: drafts, isLoading: loading } = useCollection(draftsQuery);
 
   const filteredDrafts = drafts?.filter(draft => 
-    draft.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    draft.content.toLowerCase().includes(searchTerm.toLowerCase())
+    draft.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDelete = async (id: string) => {
     if (!db || !user) return;
     try {
-      await deleteDoc(doc(db, 'users', user.uid, 'drafts', id));
+      await deleteDoc(doc(db, 'userProfiles', user.uid, 'outputs', id));
     } catch (err) {
       console.error("Failed to delete draft", err);
     }
@@ -65,7 +64,7 @@ export default function MyDraftsPage() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input 
-          placeholder="Search by title or content..." 
+          placeholder="Search by title..." 
           className="pl-10 h-12 bg-white/50 border-primary/10 rounded-xl"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -89,7 +88,7 @@ export default function MyDraftsPage() {
                       <Clock className="w-4 h-4" /> {draft.createdAt ? format(new Date(draft.createdAt), 'MMM d, yyyy h:mm a') : 'Unknown Date'}
                     </span>
                     <span className="bg-accent/10 text-accent px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                      {draft.type || 'Draft'}
+                      {draft.outputType || 'Draft'}
                     </span>
                   </div>
                 </div>
