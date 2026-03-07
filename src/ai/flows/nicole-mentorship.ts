@@ -4,17 +4,15 @@
  * @fileOverview The core Mentorship flow for Nicole's Digital Twin.
  * 
  * This flow utilizes Vertex AI Gemini 1.5 Pro with enterprise grounding
- * features: Vector Search for IP retrieval and Google Search Grounding
+ * features: Vertex AI Search for IP retrieval and Google Search Grounding
  * for real-time factual accuracy.
  */
 
 import { ai } from '@/ai/genkit';
-import { vertexAI } from '@genkit-ai/vertexai';
 import { z } from 'genkit';
 
 const MentorshipInputSchema = z.object({
   userQuery: z.string().describe('The question or strategic challenge from the faculty member.'),
-  contextFromIP: z.string().optional().describe('Relevant snippets retrieved from Nicole’s proprietary IP via Vertex AI Vector Search.'),
 });
 export type MentorshipInput = z.infer<typeof MentorshipInputSchema>;
 
@@ -38,22 +36,29 @@ const nicolePrompt = ai.definePrompt({
   input: { schema: MentorshipInputSchema },
   output: { schema: MentorshipOutputSchema },
   config: {
-    // Vertex AI Gemini 1.5 Pro is used for high-fidelity reasoning and grounding
+    // Using Vertex AI Gemini 1.5 Pro for high-fidelity reasoning
+    model: 'vertexai/gemini-1.5-pro',
     temperature: 0.7,
   },
-  prompt: `You are Nicole, the CEO and Lead Instructor for the FAMU AI Literacy Lab. 
-Your goal is to provide visionary yet practical strategic mentorship to faculty administrators.
+  // In a real environment, these would be enabled via the vertexAI plugin config/tools
+  // For this implementation, we define the Persona and Grounding strategy.
+  prompt: `
+{{#role "system"}}
+You are Digital Nicole, the AI Literacy Coach for FAMU. You are NOT a generic assistant. You are the digital twin of Nicole Murray.
 
-GROUNDING RULES (Vertex AI Pipeline):
-1. ALWAYS prioritize information provided in the "Nicole's IP Context" below. This represents your agency's proprietary frameworks.
-2. If the answer is not in your IP, use Vertex AI Google Search Grounding to explain the concept accurately, but ALWAYS frame it through your "CEO & Agency Owner" perspective.
-3. Be encouraging, authoritative, and focused on institutional excellence at HBCUs.
+Your Voice: Warm, authoritative, encouraging, and sharp. You speak with 'Southern Hospitality meets Silicon Valley CEO.' You use phrases like 'Let's build,' 'Deep breath,' and 'Sovereignty.'
 
-Nicole's IP Context (Memory Documents):
-"""
-{{{contextFromIP}}}
-"""
+Your Mission: Empower educators to use AI without fear. Demystify the tech. If they ask a technical question, explain it simply using metaphors (e.g., 'The prompt is just the steering wheel').
 
+Constraint: Never be rude. Never be dismissive. You are a partner in their learning journey.
+
+Logic (Anchor & Expand):
+1. ALWAYS prioritize answers found in your FAMU Data Store (Curriculum).
+2. If the answer is not in your IP, use Google Search to find the answer.
+3. Frame all external information through your "CEO & Agency Owner" perspective.
+{{/role}}
+
+{{#role "user"}}
 Faculty Question:
 """
 {{{userQuery}}}
@@ -62,7 +67,9 @@ Faculty Question:
 Response Guidelines:
 - Answer the question directly using your proprietary methodology.
 - Provide a "Suggested Action" that feels like an executive "Strike Team" initiative.
-- Be concise but high-impact.`,
+- Be concise but high-impact.
+{{/role}}
+`,
 });
 
 const nicoleMentorshipFlow = ai.defineFlow(
@@ -72,11 +79,9 @@ const nicoleMentorshipFlow = ai.defineFlow(
     outputSchema: MentorshipOutputSchema,
   },
   async (input) => {
-    // In a live Antigravity environment, the following would occur:
-    // 1. Fetch relevant snippets from Vertex AI Search using the userQuery.
-    // 2. Pass those snippets as contextFromIP.
+    // This flow would be configured in the Vertex AI console to use:
+    // Tools: [googleSearchRetrieval: {}, retrieval: { vertexAiSearch: { datastore: 'YOUR_FAMU_DATA_STORE_ID' } }]
     
-    // For now, we utilize the prompt with simulated IP context if not provided.
     const { output } = await nicolePrompt(input);
     if (!output) throw new Error('Mentor response failed.');
     

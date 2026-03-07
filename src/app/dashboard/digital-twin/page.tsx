@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -34,15 +35,16 @@ export default function DigitalTwinLab() {
 
     setLoading(true);
     try {
-      // Simulation of Vertex AI RAG Retrieval from your GCS Bucket
-      const res = await askNicole({ 
-        userQuery: query,
-        contextFromIP: "CEO Strategic Directive: AI transformation at HBCUs must prioritize 'Strike From The Top' leadership. Administrative efficiency is the first deployment goal to unlock faculty time for research and innovation."
-      });
+      // Direct call to the Genkit flow (Server Action)
+      const res = await askNicole({ userQuery: query });
       setResponse(res);
       setQuery('');
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Mentor Connection Error', description: 'Nicole is briefly unavailable via Vertex AI. Please try again.' });
+      toast({ 
+        variant: 'destructive', 
+        title: 'Mentor Connection Error', 
+        description: 'Nicole is briefly unavailable via Vertex AI. Deep breath, and let\'s try again.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,7 @@ export default function DigitalTwinLab() {
                     </div>
                     <div className="space-y-4 flex-1">
                       <div className="bg-white p-6 rounded-2xl rounded-tl-none shadow-sm border border-[#004B40]/10">
-                        <p className="text-[#004B40] font-medium leading-relaxed">{response.answer}</p>
+                        <p className="text-[#004B40] font-medium leading-relaxed whitespace-pre-wrap">{response.answer}</p>
                       </div>
                       <div className="bg-[#FF671F]/5 border border-[#FF671F]/20 p-6 rounded-2xl flex justify-between items-start gap-4">
                         <div>
@@ -117,8 +119,8 @@ export default function DigitalTwinLab() {
                   <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-xl">
                     <Mic className="w-10 h-10 text-[#004B40]" />
                   </div>
-                  <p className="font-headline font-bold text-[#004B40] text-xl">Vertex AI Mentor Ready.</p>
-                  <p className="text-sm font-medium max-w-xs">Ask a question grounded in Nicole's proprietary frameworks and the real-time web.</p>
+                  <p className="font-headline font-bold text-[#004B40] text-xl">Digital Nicole Ready.</p>
+                  <p className="text-sm font-medium max-w-xs">Let's build something great. Ask a question about your curriculum or the AI landscape.</p>
                 </div>
               )}
             </div>
@@ -128,7 +130,7 @@ export default function DigitalTwinLab() {
                 <Input 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ask Nicole a strategic question..."
+                  placeholder="Talk to Nicole..."
                   className="flex-1 h-14 rounded-2xl bg-white border-none shadow-sm focus-visible:ring-[#FF671F]"
                 />
                 <Button 
@@ -148,8 +150,8 @@ export default function DigitalTwinLab() {
                 <Database className="w-6 h-6 text-[#004B40]" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Vertex RAG</p>
-                <p className="text-sm font-bold text-[#004B40]">CEO Memory Index</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Vertex AI Search</p>
+                <p className="text-sm font-bold text-[#004B40]">FAMU Curriculum</p>
               </div>
             </Card>
             <Card className="p-6 bg-white border-none shadow-sm rounded-3xl flex items-center gap-4">
@@ -158,7 +160,7 @@ export default function DigitalTwinLab() {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Live Grounding</p>
-                <p className="text-sm font-bold text-[#004B40]">Vertex Search Anchor</p>
+                <p className="text-sm font-bold text-[#004B40]">World Knowledge</p>
               </div>
             </Card>
           </div>
