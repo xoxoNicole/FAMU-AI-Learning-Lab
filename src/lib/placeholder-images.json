@@ -1,6 +1,12 @@
 {
   "placeholderImages": [
     {
+      "id": "nicole-avatar",
+      "description": "Nicole Murray Professional Headshot",
+      "imageUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
+      "imageHint": "professional headshot"
+    },
+    {
       "id": "module-1",
       "description": "AI Strategy for Administrators",
       "imageUrl": "https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
