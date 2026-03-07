@@ -1,13 +1,14 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Home, User, Bell } from 'lucide-react';
+import { ChevronLeft, Home, User, Bell, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/firebase';
+import Link from 'next/link';
 
 export default function DashboardLayout({
   children,
@@ -16,11 +17,33 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
+
+  // Protect dashboard routes: Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, isUserLoading, router]);
 
   // Simple breadcrumb logic
   const pathParts = pathname.split('/').filter(Boolean);
   const isHome = pathname === '/dashboard';
+
+  if (isUserLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-[#004B40] mx-auto" />
+          <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-[0.3em]">Initializing Lab Session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not loading and no user, the useEffect will handle redirect. 
+  // We return null here to prevent flashing protected content.
+  if (!user) return null;
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -84,5 +107,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-import Link from 'next/link';

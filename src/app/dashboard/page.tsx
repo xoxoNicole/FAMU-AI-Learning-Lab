@@ -18,10 +18,11 @@ export default function Dashboard() {
   const db = useFirestore();
 
   // Fetch real modules from Firestore
+  // We wait for the 'user' to be defined to avoid permission errors (auth: null)
   const modulesQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'modules'), orderBy('title', 'asc'), limit(3));
-  }, [db]);
+  }, [db, user]);
 
   const { data: modules, isLoading: modulesLoading } = useCollection(modulesQuery);
 

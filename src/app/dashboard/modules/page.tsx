@@ -24,10 +24,11 @@ export default function ModulesListing() {
   const { data: userProfile } = useDoc(userProfileRef);
   const isAdmin = userProfile?.role === 'admin';
 
+  // We wait for 'user' to be defined before initiating the query to respect security rules (auth: null)
   const modulesQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'modules'), orderBy('title', 'asc'));
-  }, [db]);
+  }, [db, user]);
 
   const { data: modules, isLoading } = useCollection(modulesQuery);
 
@@ -89,7 +90,7 @@ export default function ModulesListing() {
               <Card key={module.id} className="glass-card hover:translate-y-[-6px] transition-all duration-300 border-none overflow-hidden group flex flex-col h-full shadow-lg">
                 <div className="relative h-56 w-full overflow-hidden">
                   <Image 
-                    src={module.thumbnail || "https://images.unsplash.com/photo-1689686610856-3bcf921eb1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"} 
+                    src={module.thumbnail || "https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"} 
                     alt={module.title} 
                     fill 
                     className="object-cover transition-transform duration-700 group-hover:scale-110" 

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap, ShieldCheck, TrendingUp, Users } from 'lucide-react';
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function CurriculumManager() {
   const db = useFirestore();
+  const { user } = useUser();
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [newTotalLicenses, setNewTotalLicenses] = useState<string>('');
@@ -32,9 +33,9 @@ export default function CurriculumManager() {
 
   // License Management
   const licenseRef = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return doc(db, 'system', 'license');
-  }, [db]);
+  }, [db, user]);
   const { data: licenseConfig } = useDoc(licenseRef);
 
   const handleUpdateLicenses = async () => {
@@ -55,9 +56,9 @@ export default function CurriculumManager() {
   };
 
   const modulesQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'modules'), orderBy('title', 'asc'));
-  }, [db]);
+  }, [db, user]);
 
   const { data: modules, isLoading } = useCollection(modulesQuery);
 
@@ -114,7 +115,7 @@ export default function CurriculumManager() {
       </header>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#004B40] text-white border-none rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
+        <Card className="bg-[#004B40] text-white border-none rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform" />
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
@@ -128,7 +129,7 @@ export default function CurriculumManager() {
           </div>
         </Card>
 
-        <Card className="bg-white border-none rounded-[2rem] p-6 shadow-sm border border-muted/50 col-span-2 flex items-center justify-between gap-6">
+        <Card className="bg-white border-none rounded-[2.5rem] p-6 shadow-sm border border-muted/50 col-span-2 flex items-center justify-between gap-6">
           <div className="space-y-1">
             <h3 className="font-bold text-[#004B40] flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#FF671F]" /> Provision Licenses
