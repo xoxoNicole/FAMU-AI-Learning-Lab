@@ -1,83 +1,462 @@
-
 {
   "entities": {
-    "User": {
-      "title": "User Profile",
-      "description": "Information about the FAMU faculty member.",
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
       "type": "object",
+      "description": "Stores profile information for authenticated users within 'The Nicole Interface', separate from authentication details which are handled by an external system. This entity focuses on user-specific application data.",
       "properties": {
-        "uid": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "displayName": { "type": "string" },
-        "title": { "type": "string", "description": "e.g., Dean, Professor" },
-        "department": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "faculty"], "default": "faculty" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, typically obtained from the external authentication system.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the user."
+        },
+        "famuAffiliationId": {
+          "type": "string",
+          "description": "An optional unique identifier representing the user's affiliation with FAMU."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this user profile was first created.",
+          "format": "date-time"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "Timestamp indicating the user's last successful login to the application.",
+          "format": "date-time"
+        }
       },
-      "required": ["uid", "email"]
-    },
-    "Draft": {
-      "title": "Strategic Draft",
-      "description": "Content generated or refined in the AI Lab.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string", "description": "Auto-generated or user-provided title." },
-        "content": { "type": "string" },
-        "type": { "type": "string", "description": "e.g., memo, proposal, email" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "tone": { "type": "number", "description": "The tone slider value (0-100)." }
-      },
-      "required": ["title", "content", "createdAt"]
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "createdAt",
+        "lastLoginAt"
+      ]
     },
     "Module": {
-      "title": "Educational Module",
-      "description": "A curriculum unit available to all users.",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Module",
       "type": "object",
+      "description": "Represents a single interactive AI learning module within 'The Nicole Interface' curriculum, featuring structured content and video introductions.",
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "duration": { "type": "string" },
-        "category": { "type": "string" },
-        "thumbnail": { "type": "string" },
-        "videoUrl": { "type": "string" },
-        "labTask": { "type": "string", "description": "The specific instruction for the AI Lab during this module." },
-        "difficulty": { "type": "string", "enum": ["Foundational", "Intermediate", "Advanced"] }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Module entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the learning module."
+        },
+        "description": {
+          "type": "string",
+          "description": "A comprehensive description or overview of the module's content and learning objectives."
+        },
+        "videoUrl": {
+          "type": "string",
+          "description": "URL to the module's high-quality, strategy-focused video introduction, typically hosted on Vimeo.",
+          "format": "uri"
+        },
+        "order": {
+          "type": "number",
+          "description": "The sequential order of the module within the overall structured curriculum."
+        },
+        "knowledgeBaseDocumentIds": {
+          "type": "array",
+          "description": "References to identifiers of curated knowledge base documents (e.g., PDFs) that support this module's content. (Relationship: Module 1:N KnowledgeBaseDocument, where 'KnowledgeBaseDocument' refers to an external storage ID)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the module was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the module was last updated.",
+          "format": "date-time"
+        }
       },
-      "required": ["title", "description", "labTask"]
+      "required": [
+        "id",
+        "title",
+        "description",
+        "videoUrl",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
     },
-    "ModuleProgress": {
-      "title": "Module Progress",
-      "description": "Tracking completion of learning modules.",
+    "Lesson": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Lesson",
       "type": "object",
+      "description": "Represents a specific lesson or an intuitive application opportunity within a learning module, designed for interaction with the AI agent.",
       "properties": {
-        "moduleId": { "type": "string" },
-        "completed": { "type": "boolean" },
-        "lastAccessed": { "type": "string", "format": "date-time" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Lesson entity."
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module that this lesson belongs to. (Relationship: Module 1:N Lesson)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the lesson or activity."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the lesson's specific objectives, activities, or the problem it addresses."
+        },
+        "order": {
+          "type": "number",
+          "description": "The sequential order of the lesson within its parent module."
+        },
+        "aiInitialPromptTemplate": {
+          "type": "string",
+          "description": "The base prompt template or instructions used to initialize the AI agent for generating content or guiding interaction within this lesson."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the lesson was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the lesson was last updated.",
+          "format": "date-time"
+        }
       },
-      "required": ["moduleId", "completed"]
+      "required": [
+        "id",
+        "moduleId",
+        "title",
+        "description",
+        "order",
+        "aiInitialPromptTemplate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserModuleProgress": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserModuleProgress",
+      "type": "object",
+      "description": "Tracks a specific user's progress, engagement, and completion status for a given interactive AI learning module.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserModuleProgress entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile whose progress is being tracked. (Relationship: UserProfile 1:N UserModuleProgress)"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module for which the user's progress is being tracked. (Relationship: Module 1:N UserModuleProgress)"
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "A boolean flag indicating whether the user has completed this module."
+        },
+        "completionDate": {
+          "type": "string",
+          "description": "Timestamp indicating when the module was marked as completed by the user. This field can be null if the module is not yet completed.",
+          "format": "date-time"
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time the user accessed or interacted with this module.",
+          "format": "date-time"
+        },
+        "progressPercentage": {
+          "type": "number",
+          "description": "The percentage of completion for the module, ranging from 0 to 100."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user's progress entry for this module was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user's progress for this module was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "moduleId",
+        "isCompleted",
+        "lastAccessedAt",
+        "progressPercentage",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Output": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Output",
+      "type": "object",
+      "description": "Represents a high-leverage output (e.g., strategic memo, grant proposal) generated, refined, and managed by a user using the Digital Nicole AI Strategist.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Output entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns and is working on this output. (Relationship: UserProfile 1:N Output)"
+        },
+        "lessonId": {
+          "type": "string",
+          "description": "Optional reference to the Lesson from which this output was initially conceived or started. (Relationship: Lesson 1:N Output)"
+        },
+        "title": {
+          "type": "string",
+          "description": "A user-defined, descriptive title for this output."
+        },
+        "outputType": {
+          "type": "string",
+          "description": "The category or predefined type of the output (e.g., 'strategic memo', 'grant proposal', 'lesson plan', 'communication draft')."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the output within its workflow (e.g., 'draft', 'in review', 'final', 'archived')."
+        },
+        "initialPrompt": {
+          "type": "string",
+          "description": "The specific prompt or instructions given to the AI strategist that initiated the generation of this output's content."
+        },
+        "currentToneSetting": {
+          "type": "string",
+          "description": "The currently applied tone setting (e.g., 'professional', 'academic', 'persuasive', 'formal') derived from the AI's 'Tone Slider' or similar tools."
+        },
+        "frameworksUsed": {
+          "type": "array",
+          "description": "A list of strategic frameworks applied or referenced during the generation or refinement process of this output (e.g., 'SWOT', 'P.E.S.T.L.E.', 'STAR').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the output was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the output was last updated (e.g., content refined, status changed).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "outputType",
+        "status",
+        "initialPrompt",
+        "currentToneSetting",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OutputRevision": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OutputRevision",
+      "type": "object",
+      "description": "Captures a specific version or iteration of an AI-generated output, tracking content changes and details of the refinement steps, including AI suggestions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OutputRevision entity."
+        },
+        "outputId": {
+          "type": "string",
+          "description": "Reference to the parent Output entity this revision belongs to. (Relationship: Output 1:N OutputRevision)"
+        },
+        "content": {
+          "type": "string",
+          "description": "The full text content of the output at this specific revision point."
+        },
+        "appliedRefinementDescription": {
+          "type": "string",
+          "description": "A clear description of the change applied in this revision (e.g., 'User edited for clarity', 'AI applied Challenge My Assumptions strategy', 'Grammar and spelling correction')."
+        },
+        "refinementTimestamp": {
+          "type": "string",
+          "description": "Timestamp indicating when this specific revision was created.",
+          "format": "date-time"
+        },
+        "isAISuggested": {
+          "type": "boolean",
+          "description": "A boolean flag indicating whether the changes in this revision were primarily suggested or automatically applied by the AI (e.g., from 'Challenge My Assumptions' button)."
+        }
+      },
+      "required": [
+        "id",
+        "outputId",
+        "content",
+        "appliedRefinementDescription",
+        "refinementTimestamp",
+        "isAISuggested"
+      ]
     }
   },
   "auth": {
-    "providers": ["google", "password"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "/users/{userId}": {
-      "schema": "#/backend/entities/User",
-      "description": "Root user profile document."
-    },
-    "/users/{userId}/drafts/{draftId}": {
-      "schema": "#/backend/entities/Draft",
-      "description": "Collection of strategic content saved by the user."
-    },
-    "/users/{userId}/progress/{moduleId}": {
-      "schema": "#/backend/entities/ModuleProgress",
-      "description": "Tracking progress for specific modules."
-    },
-    "/modules/{moduleId}": {
-      "schema": "#/backend/entities/Module",
-      "description": "Global curriculum content managed by admins."
-    }
+    "structure": [
+      {
+        "path": "userProfiles/{userProfileId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores application-specific profile information for authenticated users. Access is restricted to the owner, where `userProfileId` must match `request.auth.uid`."
+        }
+      },
+      {
+        "path": "modules/{moduleId}",
+        "definition": {
+          "entityName": "Module",
+          "schema": {
+            "$ref": "#/backend/entities/Module"
+          },
+          "description": "Global collection of interactive AI learning modules. Readable by all authenticated users, writable by administrators.",
+          "params": [
+            {
+              "name": "moduleId",
+              "description": "The unique identifier for a specific learning module."
+            }
+          ]
+        }
+      },
+      {
+        "path": "modules/{moduleId}/lessons/{lessonId}",
+        "definition": {
+          "entityName": "Lesson",
+          "schema": {
+            "$ref": "#/backend/entities/Lesson"
+          },
+          "description": "Represents a specific lesson or activity within a learning module. Readable by all authenticated users, writable by administrators. Inherits security posture from its parent module.",
+          "params": [
+            {
+              "name": "moduleId",
+              "description": "The unique identifier of the parent module."
+            },
+            {
+              "name": "lessonId",
+              "description": "The unique identifier for a specific lesson."
+            }
+          ]
+        }
+      },
+      {
+        "path": "userProfiles/{userProfileId}/moduleProgress/{progressId}",
+        "definition": {
+          "entityName": "UserModuleProgress",
+          "schema": {
+            "$ref": "#/backend/entities/UserModuleProgress"
+          },
+          "description": "Tracks a specific user's progress for a given learning module. The document includes `userId` and `moduleId` as explicit fields. Access is restricted to the owner, where `userProfileId` in the path must match `request.auth.uid`, ensuring authorization independence.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique identifier of the user (matching `request.auth.uid`) whose progress is being tracked."
+            },
+            {
+              "name": "progressId",
+              "description": "The unique identifier for a specific user module progress record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "userProfiles/{userProfileId}/outputs/{outputId}",
+        "definition": {
+          "entityName": "Output",
+          "schema": {
+            "$ref": "#/backend/entities/Output"
+          },
+          "description": "Represents a high-leverage output generated and owned by a user. The document includes `userId` as an explicit field. Access is restricted to the owner, where `userProfileId` in the path must match `request.auth.uid`, ensuring authorization independence.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique identifier of the user (matching `request.auth.uid`) who owns this output."
+            },
+            {
+              "name": "outputId",
+              "description": "The unique identifier for a specific output."
+            }
+          ]
+        }
+      },
+      {
+        "path": "userProfiles/{userProfileId}/outputs/{outputId}/revisions/{revisionId}",
+        "definition": {
+          "entityName": "OutputRevision",
+          "schema": {
+            "$ref": "#/backend/entities/OutputRevision"
+          },
+          "description": "Captures a specific version or iteration of a user's AI-generated output. Authorization relies on the `userProfileId` from the path matching `request.auth.uid`, providing authorization independence without requiring `get()` calls to the parent `Output` document. The `outputId` is also explicitly present in the document.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique identifier of the user (matching `request.auth.uid`) who owns the parent output and this revision."
+            },
+            {
+              "name": "outputId",
+              "description": "The unique identifier of the parent output to which this revision belongs."
+            },
+            {
+              "name": "revisionId",
+              "description": "The unique identifier for a specific output revision."
+            }
+          ]
+        }
+      },
+      {
+        "path": "roles_admin/{userProfileId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "A sparse collection indicating users who possess administrative privileges. Existence of a document at `{userProfileId}` grants admin access, enabling Database Access Control (DBAC) without relying on custom claims.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique identifier of the user who has an administrator role."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure prioritizes Authorization Independence, Structural Segregation, and consistent Access Modeling to ensure robust security and debuggability. \n\n**Authorization Independence (CRITICAL):**\nThis design meticulously avoids hierarchical authorization dependencies that would require `get()` calls in security rules. Instead, it leverages path-based ownership and denormalization:\n\n1.  **User-owned data (UserProfile, UserModuleProgress, Output, OutputRevision):** All user-specific data (e.g., `/userProfiles/{userProfileId}`, `/userProfiles/{userProfileId}/moduleProgress/{progressId}`, `/userProfiles/{userProfileId}/outputs/{outputId}`, `/userProfiles/{userProfileId}/outputs/{outputId}/revisions/{revisionId}`) is nested directly under `/userProfiles/{userProfileId}`. This design ensures that the `userProfileId` (which maps to `request.auth.uid`) is always available in the document path. Security rules can then simply check `request.auth.uid == userProfileId`, making authorization atomic and independent of parent document attributes, fulfilling Mandate A. Specifically for `OutputRevision`, although its schema only contains `outputId`, its placement under `/userProfiles/{userProfileId}/outputs/{outputId}/revisions/{revisionId}` means its ownership (via `userProfileId`) is explicit in the path, eliminating the need to denormalize the `userId` field into `OutputRevision` itself and preventing `get()` calls to the parent `Output` document.\n\n**Structural Segregation (Homogeneous Security Posture):**\nEach collection or subcollection is designed to have a uniform security posture, simplifying security rules:\n\n1.  **Public/Global Read-Only Data (`/modules`, `/modules/{moduleId}/lessons`):** These collections are globally accessible to all authenticated users for reading. Their security rules are simple, allowing read if `request.auth.uid != null`.\n2.  **Private User-Owned Data (`/userProfiles/{userProfileId}`, and its subcollections `moduleProgress`, `outputs`):** Access is strictly limited to the authenticated user matching `userProfileId` in the path. This clear separation avoids complex conditional logic within rules.\n3.  **Administrator Roles (`/roles_admin/{userProfileId}`):** This dedicated collection provides DBAC by checking for document existence, keeping admin authorization separate and clear.\n\n**QAPs (Rules are not Filters):**\nThe structure supports efficient and secure `list` operations without relying on security rules as filters:\n\n1.  **Global Data:** Users can list all `modules` and `lessons` because these collections are designed for global read access. No filtering is required at the rule level, only authentication.\n2.  **User-Owned Data:** A user can `list` their own `userProfiles/{userProfileId}/moduleProgress`, `userProfiles/{userProfileId}/outputs`, and `userProfiles/{userProfileId}/outputs/{outputId}/revisions` by querying the path corresponding to their `request.auth.uid`. The security rules will automatically permit access only to documents under their specific `userProfileId`, ensuring only owned data is returned. This design means queries naturally return authorized data, rather than retrieving unauthorized data and attempting to filter it with rules, which is inefficient and insecure.\n\nOverall, this structure provides a secure, scalable, and debuggable backend by rigorously applying the core design principles, making authorization explicit through path-based ownership and strategic denormalization, and ensuring predictable security postures across all data types."
   }
 }
