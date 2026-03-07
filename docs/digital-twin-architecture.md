@@ -1,4 +1,4 @@
-# Nicole: The AI Mentor & Digital Twin (Vertex AI Architecture)
+# Nicole: The AI Mentor & Digital Twin (Antigravity Architecture)
 
 This document outlines the blueprint for deploying a "Digital Twin" of Nicole, the CEO and Lead Instructor, using Vertex AI to provide 24/7 strategic mentorship to FAMU faculty.
 
@@ -19,7 +19,7 @@ This document outlines the blueprint for deploying a "Digital Twin" of Nicole, t
 
 ## 3. Visual Layer (The Digital Presence)
 - **Avatar**: A professional, high-fidelity avatar based on your official brand photography.
-- **Lip-Sync**: Real-time phoneme alignment via Vertex AI partner integrations (e.g., Synthesia or custom-hosted models) to match the custom vocal output.
+- **Lip-Sync**: Real-time phoneme alignment via Vertex AI partner integrations to match the custom vocal output.
 
 ## 4. Interaction Flow
 1. **User Query**: Faculty member asks a strategic challenge.
@@ -29,8 +29,8 @@ This document outlines the blueprint for deploying a "Digital Twin" of Nicole, t
     - TTS generates the vocal delivery in your voice.
 4. **Delivery**: The response is streamed back to the faculty member via the "Talk to Nicole" interface.
 
-## 5. Deployment & Refinement (Antigravity Workflow)
+## 5. Antigravity Maintenance (Refinement Loop)
 - **Step 1: IP Asset Collection**: Gather PDFs, transcripts, and frameworks into a GCS Bucket.
 - **Step 2: Vertex Search Setup**: Connect the bucket to a Vertex AI Data Store.
 - **Step 3: Persona Tuning**: Refine the System Prompt to match your exact CEO tone.
-- **Step 4: Continuous Learning**: Use the feedback loop in the Lab to mark responses as "Visionary" (Pass) or "Needs Refinement" (Fail) to improve the grounding.
+- **Step 4: Continuous Learning**: Use the feedback loop in the Lab to mark responses as "Visionary" (Pass) or "Needs Refinement" (Fail) to improve the grounding. This data is reviewed during Antigravity maintenance cycles to update the IP Data Store.
