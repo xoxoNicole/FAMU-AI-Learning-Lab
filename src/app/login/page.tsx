@@ -52,14 +52,14 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         // License Check
-        const total = licenseConfig?.totalLicenses || 0;
+        const total = licenseConfig?.totalLicenses || 3; // Default to 3 if not set
         const active = licenseConfig?.activeLicenses || 0;
 
         if (licenseConfig && active >= total && total > 0) {
           toast({
             variant: "destructive",
             title: "License Capacity Reached",
-            description: "No more faculty licenses are available. Contact the administrator."
+            description: "No more faculty licenses are available. Contact the Strike Team."
           });
           setLoading(false);
           return;
@@ -72,10 +72,10 @@ export default function LoginPage() {
           displayName: `${firstName} ${lastName}`
         });
 
-        // Bootstrap Admin Logic: If no licenses are active, make the first user an admin
+        // Bootstrap Admin Logic: If no licenses are active, the first registrant is the admin
         const isFirstUser = !licenseConfig || active === 0;
 
-        // Create the Profile in Firestore (Non-blocking)
+        // Create the Profile in Firestore
         setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           email: user.email,
@@ -86,17 +86,21 @@ export default function LoginPage() {
           updatedAt: new Date().toISOString()
         }, { merge: true });
 
-        // Increment License Count (Non-blocking)
-        updateDocumentNonBlocking(doc(db, 'system', 'license'), {
+        // Update the License document (initialize if first user)
+        const licenseUpdate: any = {
           activeLicenses: increment(1),
-          // Ensure totalLicenses is at least 3 for the first user if not set
-          totalLicenses: isFirstUser && (!licenseConfig?.totalLicenses) ? 3 : (licenseConfig?.totalLicenses || 3),
           updatedAt: new Date().toISOString()
-        });
+        };
+        
+        if (isFirstUser && !licenseConfig) {
+          licenseUpdate.totalLicenses = 3; // Seed first project with 3 licenses
+        }
+
+        updateDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate);
 
         toast({ 
-          title: isFirstUser ? "Admin Access Granted" : "License Registered", 
-          description: isFirstUser ? "You are the primary administrator for this lab." : "Welcome to the Strategic AI Lab." 
+          title: isFirstUser ? "Strategic Control Initialized" : "Access Granted", 
+          description: isFirstUser ? "You are registered as the primary Laboratory Administrator." : "Welcome to the Strategic AI Lab." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -105,7 +109,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: err.message || "Failed to authenticate."
+        description: err.message || "Failed to authenticate with the Strike Team server."
       });
       setLoading(false);
     }
@@ -121,7 +125,6 @@ export default function LoginPage() {
           alt="Campus Background"
           fill
           className="object-cover grayscale"
-          data-ai-hint="university campus"
         />
       </div>
 
@@ -150,7 +153,7 @@ export default function LoginPage() {
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div className="text-xs font-medium">
                   <p className="font-bold uppercase tracking-wider mb-1">Waitlist Active</p>
-                  All licenses are provisioned. Contact your administrator.
+                  All institutional licenses are currently provisioned.
                 </div>
               </div>
             )}
