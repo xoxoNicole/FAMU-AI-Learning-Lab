@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -51,7 +52,10 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         // License Check
-        if (licenseConfig && licenseConfig.activeLicenses >= licenseConfig.totalLicenses) {
+        const total = licenseConfig?.totalLicenses || 0;
+        const active = licenseConfig?.activeLicenses || 0;
+
+        if (licenseConfig && active >= total && total > 0) {
           toast({
             variant: "destructive",
             title: "License Capacity Reached",
@@ -68,13 +72,16 @@ export default function LoginPage() {
           displayName: `${firstName} ${lastName}`
         });
 
+        // Bootstrap Admin Logic: If no licenses are active, make the first user an admin
+        const isFirstUser = !licenseConfig || active === 0;
+
         // Create the Profile in Firestore (Non-blocking)
         setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           email: user.email,
           firstName,
           lastName,
-          role: 'faculty',
+          role: isFirstUser ? 'admin' : 'faculty',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }, { merge: true });
@@ -82,10 +89,15 @@ export default function LoginPage() {
         // Increment License Count (Non-blocking)
         updateDocumentNonBlocking(doc(db, 'system', 'license'), {
           activeLicenses: increment(1),
+          // Ensure totalLicenses is at least 3 for the first user if not set
+          totalLicenses: isFirstUser && (!licenseConfig?.totalLicenses) ? 3 : (licenseConfig?.totalLicenses || 3),
           updatedAt: new Date().toISOString()
         });
 
-        toast({ title: "License Registered", description: "Welcome to the Strategic AI Lab." });
+        toast({ 
+          title: isFirstUser ? "Admin Access Granted" : "License Registered", 
+          description: isFirstUser ? "You are the primary administrator for this lab." : "Welcome to the Strategic AI Lab." 
+        });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
@@ -99,7 +111,7 @@ export default function LoginPage() {
     }
   };
 
-  const licensesRemaining = licenseConfig ? licenseConfig.totalLicenses - licenseConfig.activeLicenses : 0;
+  const licensesRemaining = licenseConfig ? licenseConfig.totalLicenses - licenseConfig.activeLicenses : 3;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#004B40] relative overflow-hidden p-6">
@@ -133,7 +145,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isSignUp && !licenseLoading && licensesRemaining <= 0 && (
+            {isSignUp && !licenseLoading && licensesRemaining <= 0 && licenseConfig?.totalLicenses > 0 && (
               <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-700">
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div className="text-xs font-medium">
@@ -194,7 +206,7 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                disabled={loading || (isSignUp && licensesRemaining <= 0)}
+                disabled={loading || (isSignUp && licensesRemaining <= 0 && licenseConfig?.totalLicenses > 0)}
                 className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register License</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
