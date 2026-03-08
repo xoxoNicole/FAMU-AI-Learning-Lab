@@ -19,7 +19,8 @@ import {
   Check,
   History,
   ChevronDown,
-  Clock
+  Clock,
+  RotateCcw
 } from 'lucide-react';
 import { generateStrategicContent } from '@/ai/flows/generate-strategic-content';
 import { challengeAssumptionsAndFeedback } from '@/ai/flows/challenge-assumptions-and-feedback';
@@ -28,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, doc, getDoc } from 'firebase/firestore';
-import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { addDocumentNonBlocking, updateDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 
@@ -100,7 +101,7 @@ export function NicoleChat() {
     try {
       const res = await generateStrategicContent({ request: input });
       setOutput(res.draft);
-      toast({ title: "Draft Generated", description: "Your strategic content is ready for refinement." });
+      toast({ title: "Draft Generated", description: "Strategic content is ready for refinement." });
       
       if (draftId) {
         saveRevision(res.draft, "Major re-generation from prompt", true);
@@ -129,10 +130,10 @@ export function NicoleChat() {
         saveRevision(output, "Manual Save/Checkpoint");
       } else {
         const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Output";
-        const docRef = await getDoc(doc(collection(db, 'userProfiles', user.uid, 'outputs'))); // Dummy to get ID
-        const newDocId = docRef.id;
+        const newDocRef = doc(collection(db, 'userProfiles', user.uid, 'outputs'));
+        const newDocId = newDocRef.id;
         
-        setDocumentNonBlocking(doc(db, 'userProfiles', user.uid, 'outputs', newDocId), {
+        setDocumentNonBlocking(newDocRef, {
           id: newDocId,
           userId: user.uid,
           title: title,
@@ -154,7 +155,7 @@ export function NicoleChat() {
         });
       }
       setSaveSuccess(true);
-      toast({ title: "Strategic Output Saved", description: "Successfully archived in your drafts." });
+      toast({ title: "Output Archived", description: "Successfully saved to your strategic repository." });
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to save output." });
@@ -169,7 +170,7 @@ export function NicoleChat() {
     try {
       const res = await challengeAssumptionsAndFeedback({ draftedContent: output });
       setFeedback(res);
-      toast({ title: "Analysis Complete", description: "Strategic friction identified. Review the insights below." });
+      toast({ title: "Analysis Complete", description: "Strategic friction identified." });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to analyze content." });
     } finally {
@@ -187,12 +188,19 @@ export function NicoleChat() {
         instructions: `Refine this content to be ${toneDescription}.` 
       });
       setOutput(res.refinedContent);
-      saveRevision(res.refinedContent, `AI Refinement: ${toneDescription}`, true);
+      if (draftId) {
+        saveRevision(res.refinedContent, `AI Refinement: ${toneDescription}`, true);
+      }
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to refine content." });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRestore = (content: string) => {
+    setOutput(content);
+    toast({ title: "Revision Restored", description: "Switched to previous strategic state." });
   };
 
   return (
@@ -206,7 +214,7 @@ export function NicoleChat() {
             <div className="flex-1">
               <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-widest mb-1">Strategic AI Lab</p>
               <p className="text-[#004B40] font-medium leading-relaxed">
-                Describe the strategic output we're building today. I'll help you find the clarity you need.
+                Describe the strategic output we're building today. "Deep breath," and let's find clarity.
               </p>
             </div>
           </div>
@@ -265,18 +273,27 @@ export function NicoleChat() {
                   {revisions.map((rev) => (
                     <div 
                       key={rev.id} 
-                      onClick={() => setOutput(rev.content)}
-                      className="p-4 rounded-2xl bg-white border border-[#004B40]/5 hover:border-[#FF671F]/20 cursor-pointer transition-all hover:shadow-md group"
+                      className="p-4 rounded-2xl bg-white border border-[#004B40]/5 hover:border-[#FF671F]/20 transition-all hover:shadow-md group"
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <p className="text-sm font-bold text-[#004B40] group-hover:text-[#FF671F] transition-colors">
-                          {rev.appliedRefinementDescription}
-                        </p>
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {rev.refinementTimestamp ? format(new Date(rev.refinementTimestamp), 'MMM d, h:mm a') : 'Recent'}
-                        </span>
+                        <div>
+                          <p className="text-sm font-bold text-[#004B40]">
+                            {rev.appliedRefinementDescription}
+                          </p>
+                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> {rev.refinementTimestamp ? format(new Date(rev.refinementTimestamp), 'MMM d, h:mm a') : 'Recent'}
+                          </span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleRestore(rev.content)}
+                          className="rounded-lg h-8 px-3 text-[10px] font-bold uppercase text-[#FF671F] hover:bg-[#FF671F]/10 gap-1.5"
+                        >
+                          <RotateCcw className="w-3 h-3" /> Restore
+                        </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1 italic">"{rev.content.substring(0, 100)}..."</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1 italic mt-2">"{rev.content.substring(0, 100)}..."</p>
                     </div>
                   ))}
                 </div>

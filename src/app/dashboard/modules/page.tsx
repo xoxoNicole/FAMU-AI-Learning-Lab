@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -7,7 +6,7 @@ import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PlayCircle, Clock, BookOpen, Star, Plus, Loader2 } from 'lucide-react';
+import { PlayCircle, Clock, BookOpen, Star, Plus, Loader2, CheckCircle2 } from 'lucide-react';
 import { useFirestore, useCollection, useUser, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 
@@ -15,7 +14,6 @@ export default function ModulesListing() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
 
-  // Fetch the current user profile to check for the 'admin' role
   const userProfileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'userProfiles', user.uid);
@@ -24,18 +22,26 @@ export default function ModulesListing() {
   const { data: userProfile } = useDoc(userProfileRef);
   const isAdmin = userProfile?.role === 'admin';
 
-  // We wait for 'user' to be defined before initiating the query to respect security rules (auth: null)
   const modulesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'modules'), orderBy('title', 'asc'));
   }, [db, user]);
 
-  const { data: modules, isLoading } = useCollection(modulesQuery);
+  const { data: modules, isLoading: modulesLoading } = useCollection(modulesQuery);
 
-  // Fallback for progress
+  const progressQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'userProfiles', user.uid, 'moduleProgress'));
+  }, [db, user]);
+
+  const { data: progressList, isLoading: progressLoading } = useCollection(progressQuery);
+
   const getProgress = (moduleId: string) => {
-    return 0; // Simplified for prototype
+    const prog = progressList?.find(p => p.id === moduleId);
+    return prog ? (prog.progressPercentage || 0) : 0;
   };
+
+  const completedCount = progressList?.filter(p => p.isCompleted).length || 0;
 
   if (isUserLoading) {
     return (
@@ -68,7 +74,7 @@ export default function ModulesListing() {
             <Card className="glass-card py-3 px-6 border-none flex items-center gap-4 shadow-xl">
               <div className="text-right">
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Earned Badges</p>
-                <p className="text-xl font-headline font-bold text-[#004B40]">0 / 12</p>
+                <p className="text-xl font-headline font-bold text-[#004B40]">{completedCount} / {modules?.length || 0}</p>
               </div>
               <Star className="w-8 h-8 text-[#FF671F] fill-[#FF671F]" />
             </Card>
@@ -76,7 +82,7 @@ export default function ModulesListing() {
         </div>
       </header>
 
-      {isLoading ? (
+      {modulesLoading || progressLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[1, 2, 3].map(i => (
             <Card key={i} className="h-96 animate-pulse bg-muted rounded-[2rem]" />
@@ -86,11 +92,13 @@ export default function ModulesListing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {modules.map((module) => {
             const progress = getProgress(module.id);
+            const isCompleted = progress === 100;
+
             return (
               <Card key={module.id} className="glass-card hover:translate-y-[-6px] transition-all duration-300 border-none overflow-hidden group flex flex-col h-full shadow-lg">
                 <div className="relative h-56 w-full overflow-hidden">
                   <Image 
-                    src={module.thumbnail || "https://images.unsplash.com/photo-1646583288948-24548aedffd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"} 
+                    src={module.thumbnail || "https://picsum.photos/seed/" + module.id + "/1080/800"} 
                     alt={module.title} 
                     fill 
                     className="object-cover transition-transform duration-700 group-hover:scale-110" 
@@ -102,6 +110,11 @@ export default function ModulesListing() {
                       {module.category || 'Core'}
                     </span>
                   </div>
+                  {isCompleted && (
+                    <div className="absolute top-4 right-4 bg-green-500 text-white p-1.5 rounded-full shadow-lg">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                  )}
                   <div className="absolute bottom-4 left-4 flex items-center gap-3 text-white">
                     <div className="flex items-center gap-1 text-xs font-bold">
                       <Clock className="w-3 h-3 text-[#FF671F]" /> {module.duration || '45 mins'}
@@ -128,9 +141,9 @@ export default function ModulesListing() {
                   </div>
                   
                   <Link href={`/dashboard/modules/${module.id}`} className="block">
-                    <Button className="w-full h-12 rounded-2xl bg-[#004B40] hover:bg-[#004B40]/90 text-white font-headline font-bold transition-all shadow-lg group-hover:shadow-[#004B40]/20">
+                    <Button className={`w-full h-12 rounded-2xl font-headline font-bold transition-all shadow-lg ${isCompleted ? 'bg-[#004B40]/10 text-[#004B40] hover:bg-[#004B40]/20' : 'bg-[#004B40] hover:bg-[#004B40]/90 text-white group-hover:shadow-[#004B40]/20'}`}>
                       <PlayCircle className="w-5 h-5 mr-2" />
-                      {progress === 100 ? 'Review Module' : progress > 0 ? 'Resume Lab' : 'Start Module'}
+                      {isCompleted ? 'Review Mastery' : progress > 0 ? 'Resume Lab' : 'Start Module'}
                     </Button>
                   </Link>
                 </CardContent>
@@ -142,8 +155,8 @@ export default function ModulesListing() {
         <Card className="p-20 text-center glass-card border-none rounded-[3rem]">
           <div className="max-w-xs mx-auto space-y-4">
             <BookOpen className="w-16 h-16 text-muted-foreground/20 mx-auto" />
-            <h3 className="text-2xl font-headline font-bold text-[#004B40]">No Modules Available</h3>
-            <p className="text-muted-foreground">The strategic curriculum is currently being initialized by the administration.</p>
+            <h3 className="text-2xl font-headline font-bold text-[#004B40]">No Modules Deployed</h3>
+            <p className="text-muted-foreground font-medium">The strategic curriculum is still being indexed by the Strike Team.</p>
             {isAdmin && (
               <Link href="/dashboard/curriculum-manager">
                 <Button className="bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-bold rounded-xl mt-4">
