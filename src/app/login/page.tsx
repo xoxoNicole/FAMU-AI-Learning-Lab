@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,7 +8,8 @@ import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lu
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, setDoc, updateDoc, increment, getDoc } from 'firebase/firestore';
+import { doc, increment } from 'firebase/firestore';
+import { setDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
@@ -68,19 +68,19 @@ export default function LoginPage() {
           displayName: `${firstName} ${lastName}`
         });
 
-        // Create the Profile in Firestore
-        await setDoc(doc(db, 'userProfiles', user.uid), {
+        // Create the Profile in Firestore (Non-blocking)
+        setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           email: user.email,
           firstName,
           lastName,
-          role: 'faculty', // Default to faculty
+          role: 'faculty',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        }, { merge: true });
 
-        // Increment License Count
-        await updateDoc(doc(db, 'system', 'license'), {
+        // Increment License Count (Non-blocking)
+        updateDocumentNonBlocking(doc(db, 'system', 'license'), {
           activeLicenses: increment(1),
           updatedAt: new Date().toISOString()
         });

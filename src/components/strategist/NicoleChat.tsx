@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -19,7 +18,6 @@ import {
   FileText,
   Check,
   History,
-  ChevronRight,
   ChevronDown,
   Clock
 } from 'lucide-react';
@@ -29,8 +27,8 @@ import { refineContentWithAI } from '@/ai/flows/refine-content-with-ai';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 
@@ -50,7 +48,6 @@ export function NicoleChat() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get('draftId');
 
-  // Fetch revisions history
   const revisionsQuery = useMemoFirebase(() => {
     if (!db || !user || !draftId) return null;
     return query(
@@ -89,9 +86,8 @@ export function NicoleChat() {
       isAISuggested
     });
 
-    // Update the main output doc content as well
     const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
-    updateDoc(draftRef, {
+    updateDocumentNonBlocking(draftRef, {
       content: content,
       updatedAt: new Date().toISOString()
     });
@@ -124,7 +120,7 @@ export function NicoleChat() {
       
       if (draftId) {
         const draftRef = doc(db, 'userProfiles', user.uid, 'outputs', draftId);
-        await updateDoc(draftRef, {
+        updateDocumentNonBlocking(draftRef, {
           title: input.substring(0, 50) || "Untitled Strategic Output",
           content: output,
           currentToneSetting: toneValue,
@@ -133,7 +129,11 @@ export function NicoleChat() {
         saveRevision(output, "Manual Save/Checkpoint");
       } else {
         const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Output";
-        const docRef = await addDoc(collection(db, 'userProfiles', user.uid, 'outputs'), {
+        const docRef = await getDoc(doc(collection(db, 'userProfiles', user.uid, 'outputs'))); // Dummy to get ID
+        const newDocId = docRef.id;
+        
+        setDocumentNonBlocking(doc(db, 'userProfiles', user.uid, 'outputs', newDocId), {
+          id: newDocId,
           userId: user.uid,
           title: title,
           content: output,
@@ -143,10 +143,10 @@ export function NicoleChat() {
           currentToneSetting: toneValue,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        });
+        }, { merge: true });
 
-        await addDoc(collection(db, 'userProfiles', user.uid, 'outputs', docRef.id, 'revisions'), {
-          outputId: docRef.id,
+        addDocumentNonBlocking(collection(db, 'userProfiles', user.uid, 'outputs', newDocId, 'revisions'), {
+          outputId: newDocId,
           content: output,
           appliedRefinementDescription: "Initial AI Generation",
           refinementTimestamp: new Date().toISOString(),
