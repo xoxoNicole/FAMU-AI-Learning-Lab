@@ -96,7 +96,8 @@ export default function LoginPage() {
           licenseUpdate.totalLicenses = 3; // Seed first project with 3 licenses
         }
 
-        updateDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate);
+        // Use set with merge for the license to ensure it works even if doc doesn't exist
+        setDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate, { merge: true });
 
         toast({ 
           title: isFirstUser ? "Strategic Control Initialized" : "Access Granted", 
@@ -125,6 +126,7 @@ export default function LoginPage() {
           alt="Campus Background"
           fill
           className="object-cover grayscale"
+          priority
         />
       </div>
 

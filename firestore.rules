@@ -9,7 +9,8 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /userProfiles/{userId} {
@@ -22,7 +23,8 @@ service cloud.firestore {
     match /system/license {
       // Allow anyone (even unauthenticated) to check if there are available licenses
       allow get: if true;
-      allow write: if isAdmin();
+      // Allow authenticated users to create/update for registration counting
+      allow create, update: if isSignedIn();
     }
 
     match /modules/{moduleId} {
@@ -47,8 +49,8 @@ service cloud.firestore {
       }
     }
 
-    match /roles_admin/{userId} {
-      allow get: if isSignedIn();
+    match /feedback/{feedbackId} {
+      allow create: if isSignedIn();
       allow read: if isAdmin();
     }
   }
