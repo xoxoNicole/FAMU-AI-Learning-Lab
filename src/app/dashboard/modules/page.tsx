@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -6,7 +7,7 @@ import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PlayCircle, Clock, BookOpen, Star, Plus, Loader2, CheckCircle2 } from 'lucide-react';
+import { PlayCircle, Clock, BookOpen, Star, Plus, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { useFirestore, useCollection, useUser, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 
@@ -152,15 +153,19 @@ export default function ModulesListing() {
           })}
         </div>
       ) : (
-        <Card className="p-20 text-center glass-card border-none rounded-[3rem]">
-          <div className="max-w-xs mx-auto space-y-4">
-            <BookOpen className="w-16 h-16 text-muted-foreground/20 mx-auto" />
-            <h3 className="text-2xl font-headline font-bold text-[#004B40]">No Modules Deployed</h3>
-            <p className="text-muted-foreground font-medium">The strategic curriculum is still being indexed by the Strike Team.</p>
+        <Card className="p-20 text-center glass-card border-none rounded-[3rem] bg-white">
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="w-20 h-20 bg-[#004B40]/5 rounded-3xl flex items-center justify-center mx-auto">
+              <Sparkles className="w-10 h-10 text-[#FF671F]" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-3xl font-headline font-bold text-[#004B40]">Initializing Curriculum</h3>
+              <p className="text-muted-foreground font-medium">Nicole is currently indexing the proprietary FAMU strategic modules. Take a deep breath—your learning journey will begin shortly.</p>
+            </div>
             {isAdmin && (
               <Link href="/dashboard/curriculum-manager">
-                <Button className="bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-bold rounded-xl mt-4">
-                  Add First Module
+                <Button className="bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-bold rounded-xl h-12 px-8">
+                  Deploy First Module
                 </Button>
               </Link>
             )}

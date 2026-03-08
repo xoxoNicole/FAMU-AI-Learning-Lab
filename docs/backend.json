@@ -52,6 +52,21 @@
         }
       },
       "required": ["totalLicenses", "activeLicenses", "updatedAt"]
+    },
+    "Feedback": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Feedback",
+      "type": "object",
+      "description": "User feedback on AI mentor responses.",
+      "properties": {
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "query": { "type": "string" },
+        "response": { "type": "string" },
+        "isPositive": { "type": "boolean" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "query", "response", "isPositive", "timestamp"]
     }
   },
   "auth": {
@@ -81,6 +96,14 @@
           "entityName": "Module",
           "schema": { "$ref": "#/backend/entities/Module" },
           "description": "Learning modules catalog."
+        }
+      },
+      {
+        "path": "feedback/{feedbackId}",
+        "definition": {
+          "entityName": "Feedback",
+          "schema": { "$ref": "#/backend/entities/Feedback" },
+          "description": "Audit log for AI responses."
         }
       }
     ]

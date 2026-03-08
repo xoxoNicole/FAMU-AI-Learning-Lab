@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -164,6 +165,18 @@ export function NicoleChat() {
     }
   };
 
+  const handleExport = () => {
+    if (!output) return;
+    const blob = new Blob([output], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `strategic-brief-${new Date().getTime()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Strategic Export", description: "Brief has been downloaded as a text file." });
+  };
+
   const handleChallenge = async () => {
     if (!output) return;
     setLoading(true);
@@ -220,7 +233,7 @@ export function NicoleChat() {
           </div>
         </Card>
 
-        {output && (
+        {output ? (
           <div className="space-y-6">
             <Card className="glass-card p-8 border-none shadow-2xl rounded-[2.5rem] animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white relative">
               <div className="absolute top-8 right-8 flex gap-2">
@@ -253,8 +266,8 @@ export function NicoleChat() {
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {saveSuccess ? "Archived!" : draftId ? "Save Changes" : "Save to Repository"}
                 </Button>
-                <Button variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
-                  <Download className="w-4 h-4 mr-2" /> Export PDF
+                <Button onClick={handleExport} variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
+                  <Download className="w-4 h-4 mr-2" /> Export .txt
                 </Button>
               </div>
             </Card>
@@ -299,6 +312,16 @@ export function NicoleChat() {
                 </div>
               </Card>
             )}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center p-12 space-y-6 opacity-40">
+            <div className="w-20 h-20 rounded-3xl bg-[#004B40]/5 flex items-center justify-center">
+              <FileText className="w-10 h-10 text-[#004B40]" />
+            </div>
+            <div>
+              <p className="text-xl font-headline font-bold text-[#004B40]">No Strategy Drafted</p>
+              <p className="text-sm font-medium">Use the lab command below to begin your first institutional brief.</p>
+            </div>
           </div>
         )}
 

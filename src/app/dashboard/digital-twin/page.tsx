@@ -24,12 +24,19 @@ import Image from 'next/image';
 import { askNicole, MentorshipOutput } from '@/ai/flows/nicole-mentorship';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import Link from 'next/link';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function DigitalTwinLab() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<MentorshipOutput | null>(null);
+  const [lastQuery, setLastQuery] = useState('');
   const { toast } = useToast();
+  const { user } = useUser();
+  const db = useFirestore();
 
   const nicoleAvatar = PlaceHolderImages.find(img => img.id === 'nicole-avatar')?.imageUrl || "https://picsum.photos/seed/nicole/400/400";
 
@@ -38,6 +45,7 @@ export default function DigitalTwinLab() {
     if (!query.trim()) return;
 
     setLoading(true);
+    setLastQuery(query);
     try {
       const res = await askNicole({ userQuery: query });
       setResponse(res);
@@ -53,10 +61,21 @@ export default function DigitalTwinLab() {
     }
   };
 
-  const handleFeedback = (type: 'positive' | 'negative') => {
+  const handleFeedback = (isPositive: boolean) => {
+    if (!user || !db || !response) return;
+
+    addDocumentNonBlocking(collection(db, 'feedback'), {
+      userId: user.uid,
+      userEmail: user.email,
+      query: lastQuery,
+      response: response.answer,
+      isPositive,
+      timestamp: new Date().toISOString()
+    });
+
     toast({ 
       title: "Feedback Recorded", 
-      description: "This interaction will be used to further refine Nicole's strategic persona in the Antigravity pipeline." 
+      description: "The Strike Team will use this to further refine Nicole's strategic persona." 
     });
   };
 
@@ -70,9 +89,11 @@ export default function DigitalTwinLab() {
           <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">Talk to Nicole</h1>
           <p className="text-xl text-muted-foreground font-medium">Your 24/7 executive coach powered by Vertex AI.</p>
         </div>
-        <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
-          <Settings className="w-4 h-4 mr-2" /> Antigravity Maintenance
-        </Button>
+        <Link href="/dashboard/admin/maintenance">
+          <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
+            <Settings className="w-4 h-4 mr-2" /> Antigravity Maintenance
+          </Button>
+        </Link>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -106,10 +127,10 @@ export default function DigitalTwinLab() {
                           <p className="text-[#004B40] font-bold italic">"{response.suggestedAction}"</p>
                         </div>
                         <div className="flex gap-2 shrink-0">
-                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback('positive')}>
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback(true)}>
                             <ThumbsUp className="w-4 h-4 text-green-600" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback('negative')}>
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-white" onClick={() => handleFeedback(false)}>
                             <ThumbsDown className="w-4 h-4 text-red-600" />
                           </Button>
                         </div>

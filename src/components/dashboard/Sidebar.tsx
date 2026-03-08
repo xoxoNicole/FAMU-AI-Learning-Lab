@@ -13,11 +13,13 @@ import {
   Target,
   UserCheck,
   History,
-  ArrowUpRight
+  ArrowUpRight,
+  Settings,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, limit, doc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +38,14 @@ export function Sidebar() {
   const { user } = useUser();
   const db = useFirestore();
   const router = useRouter();
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'userProfiles', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(userProfileRef);
+  const isAdmin = profile?.role === 'admin';
 
   const recentDraftsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -90,6 +100,22 @@ export function Sidebar() {
           );
         })}
 
+        {isAdmin && (
+          <div className="pt-4 px-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Strike Team</p>
+            <Link 
+              href="/dashboard/admin/maintenance"
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                pathname === '/dashboard/admin/maintenance' ? "bg-[#FF671F]/10 text-[#FF671F]" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span className="font-bold text-xs uppercase">Maintenance</span>
+            </Link>
+          </div>
+        )}
+
         {recentDrafts && recentDrafts.length > 0 && (
           <div className="pt-8 px-4 space-y-4">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
@@ -115,7 +141,15 @@ export function Sidebar() {
 
       <div className="p-6">
         <div className="p-4 rounded-3xl bg-muted/50 border border-muted space-y-3">
-          <p className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-wider">Session Security</p>
+          <Link 
+            href="/dashboard/profile"
+            className="w-full flex items-center gap-3 px-1 py-1 text-muted-foreground hover:text-[#004B40] transition-colors group"
+          >
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-[#004B40]/5">
+              <Settings className="w-4 h-4" />
+            </div>
+            <span className="font-bold text-xs uppercase tracking-widest">Settings</span>
+          </Link>
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-1 py-1 text-muted-foreground hover:text-destructive cursor-pointer transition-colors group"
