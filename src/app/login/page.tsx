@@ -49,20 +49,24 @@ export default function LoginPage() {
     if (!auth || !db) return;
     setLoading(true);
 
+    const isBuilderDomain = email.toLowerCase().endsWith('@themogulfactory.co');
+
     try {
       if (isSignUp) {
-        // License Check
-        const total = licenseConfig?.totalLicenses || 3; // Default to 3 if not set
-        const active = licenseConfig?.activeLicenses || 0;
+        // License Check only for Faculty (Non-Builders)
+        if (!isBuilderDomain) {
+          const total = licenseConfig?.totalLicenses ?? 3;
+          const active = licenseConfig?.activeLicenses ?? 0;
 
-        if (licenseConfig && active >= total && total > 0) {
-          toast({
-            variant: "destructive",
-            title: "License Capacity Reached",
-            description: "No more faculty licenses are available. Contact the Strike Team."
-          });
-          setLoading(false);
-          return;
+          if (active >= total && total > 0) {
+            toast({
+              variant: "destructive",
+              title: "License Capacity Reached",
+              description: "All institutional faculty licenses are currently provisioned. Contact the Builder."
+            });
+            setLoading(false);
+            return;
+          }
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -72,36 +76,44 @@ export default function LoginPage() {
           displayName: `${firstName} ${lastName}`
         });
 
-        // Bootstrap Admin Logic: If no licenses are active, the first registrant is the admin
-        const isFirstUser = !licenseConfig || active === 0;
+        // Assign Role based on Domain
+        const role = isBuilderDomain ? 'admin' : 'faculty';
 
-        // Create the Profile in Firestore
+        // Create Profile in Firestore
         setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           email: user.email,
           firstName,
           lastName,
-          role: isFirstUser ? 'admin' : 'faculty',
+          role: role,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }, { merge: true });
 
-        // Update the License document (initialize if first user)
-        const licenseUpdate: any = {
-          activeLicenses: increment(1),
-          updatedAt: new Date().toISOString()
-        };
-        
-        if (isFirstUser && !licenseConfig) {
-          licenseUpdate.totalLicenses = 3; // Seed first project with 3 licenses
+        // Update License if Faculty
+        if (role === 'faculty') {
+          const licenseUpdate: any = {
+            activeLicenses: increment(1),
+            updatedAt: new Date().toISOString()
+          };
+          
+          // Ensure base license doc exists if first user is faculty
+          if (!licenseConfig) {
+            licenseUpdate.totalLicenses = 3;
+          }
+          setDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate, { merge: true });
+        } else if (isBuilderDomain && !licenseConfig) {
+          // If first user is Builder, seed the license config
+          setDocumentNonBlocking(doc(db, 'system', 'license'), {
+            totalLicenses: 3,
+            activeLicenses: 0,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
         }
 
-        // Use set with merge for the license to ensure it works even if doc doesn't exist
-        setDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate, { merge: true });
-
         toast({ 
-          title: isFirstUser ? "Strategic Control Initialized" : "Access Granted", 
-          description: isFirstUser ? "You are registered as the primary Laboratory Administrator." : "Welcome to the Strategic AI Lab." 
+          title: role === 'admin' ? "Builder Terminal Accessed" : "License Provisioned", 
+          description: role === 'admin' ? "Welcome to the Strategic Command Center." : "Your institutional access is active." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -116,7 +128,7 @@ export default function LoginPage() {
     }
   };
 
-  const licensesRemaining = licenseConfig ? licenseConfig.totalLicenses - licenseConfig.activeLicenses : 3;
+  const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#004B40] relative overflow-hidden p-6">
@@ -143,19 +155,19 @@ export default function LoginPage() {
           <div className="h-2 bg-[#FF671F]" />
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-3xl font-headline text-[#004B40]">
-              {isSignUp ? 'Apply for License' : 'Faculty Access'}
+              {isSignUp ? 'Apply for License' : 'Secure Access'}
             </CardTitle>
             <CardDescription>
-              {isSignUp ? 'Join the strategic laboratory for innovation.' : 'Enter your credentials to enter the lab.'}
+              {isSignUp ? 'Builder or Faculty registration for the strategic lab.' : 'Enter your credentials to enter the lab.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isSignUp && !licenseLoading && licensesRemaining <= 0 && licenseConfig?.totalLicenses > 0 && (
+            {isSignUp && !licenseLoading && licensesRemaining <= 0 && licenseConfig?.totalLicenses > 0 && !email.endsWith('@themogulfactory.co') && (
               <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-700">
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div className="text-xs font-medium">
                   <p className="font-bold uppercase tracking-wider mb-1">Waitlist Active</p>
-                  All institutional licenses are currently provisioned.
+                  Institutional capacity reached. Contact the Builder for more licenses.
                 </div>
               </div>
             )}
@@ -165,56 +177,56 @@ export default function LoginPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">First Name</label>
-                    <Input 
+                    <input 
                       required
                       value={firstName}
                       onChange={e => setFirstName(e.target.value)}
                       placeholder="Jane" 
-                      className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                      className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Last Name</label>
-                    <Input 
+                    <input 
                       required
                       value={lastName}
                       onChange={e => setLastName(e.target.value)}
                       placeholder="Doe" 
-                      className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                      className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                     />
                   </div>
                 </div>
               )}
               
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">FAMU Email</label>
-                <Input 
+                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Work Email</label>
+                <input 
                   type="email" 
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="name@famu.edu" 
-                  className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                  placeholder="name@themogulfactory.co" 
+                  className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Password</label>
-                <Input 
+                <input 
                   type="password" 
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" 
-                  className="bg-muted/30 border-none h-12 rounded-xl focus-visible:ring-[#FF671F]"
+                  className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                 />
               </div>
               
               <Button 
                 type="submit" 
-                disabled={loading || (isSignUp && licensesRemaining <= 0 && licenseConfig?.totalLicenses > 0)}
+                disabled={loading || (isSignUp && licensesRemaining <= 0 && !email.toLowerCase().endsWith('@themogulfactory.co') && (licenseConfig?.totalLicenses ?? 0) > 0)}
                 className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register License</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
               </Button>
             </form>
 
@@ -224,18 +236,18 @@ export default function LoginPage() {
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-[#004B40] font-bold text-sm hover:bg-[#004B40]/5 rounded-xl h-12"
               >
-                {isSignUp ? 'Already have a license? Sign In' : 'Need a license? Apply here'}
+                {isSignUp ? 'Already have access? Sign In' : 'Need a license? Apply here'}
               </Button>
               
               <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 border-t border-muted pt-6">
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${licensesRemaining > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
-                  {licenseLoading ? 'Syncing...' : `${licensesRemaining} Licenses Left`}
+                  {licenseLoading ? 'Syncing...' : `${licensesRemaining} Faculty Slots Left`}
                 </div>
                 <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Enterprise Secure
+                  Strike Team Secured
                 </div>
               </div>
             </div>

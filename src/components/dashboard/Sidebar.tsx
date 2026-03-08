@@ -15,7 +15,8 @@ import {
   History,
   ArrowUpRight,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  Terminal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
@@ -80,7 +81,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
-        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Main Menu</p>
+        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Institutional Core</p>
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
@@ -101,17 +102,29 @@ export function Sidebar() {
         })}
 
         {isAdmin && (
-          <div className="pt-4 px-4">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Strike Team</p>
+          <div className="pt-8 px-4 space-y-2">
+            <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+              <Terminal className="w-3 h-3" /> Builder Terminal
+            </p>
+            <Link 
+              href="/dashboard/curriculum-manager"
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                pathname === '/dashboard/curriculum-manager' ? "bg-[#004B40]/5 text-[#004B40]" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <ShieldCheck className="w-4 h-4 text-[#FF671F]" />
+              <span className="font-bold text-[11px] uppercase tracking-wider">Strategic Control</span>
+            </Link>
             <Link 
               href="/dashboard/admin/maintenance"
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
-                pathname === '/dashboard/admin/maintenance' ? "bg-[#FF671F]/10 text-[#FF671F]" : "text-muted-foreground hover:bg-muted"
+                pathname === '/dashboard/admin/maintenance' ? "bg-[#004B40]/5 text-[#004B40]" : "text-muted-foreground hover:bg-muted"
               )}
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span className="font-bold text-xs uppercase">Maintenance</span>
+              <History className="w-4 h-4 text-[#FF671F]" />
+              <span className="font-bold text-[11px] uppercase tracking-wider">Site Audit Log</span>
             </Link>
           </div>
         )}

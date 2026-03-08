@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap, ShieldCheck, TrendingUp, Users } from 'lucide-react';
+import { BookOpen, Plus, Trash2, LayoutGrid, Clock, Video, X, Zap, ShieldCheck, TrendingUp, Users, Terminal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CurriculumManager() {
@@ -48,10 +48,10 @@ export default function CurriculumManager() {
         totalLicenses: val,
         updatedAt: new Date().toISOString()
       });
-      toast({ title: "Licensing Provisioned", description: `Updated to ${val} total faculty licenses.` });
+      toast({ title: "Licensing Updated", description: `Client provisioned for ${val} total faculty licenses.` });
       setNewTotalLicenses('');
     } catch (err) {
-      toast({ variant: "destructive", title: "Update Failed", description: "You may not have administrative permissions for this action." });
+      toast({ variant: "destructive", title: "Update Failed", description: "Builder Terminal authentication required." });
     }
   };
 
@@ -73,7 +73,7 @@ export default function CurriculumManager() {
     
     toast({ 
       title: "Module Deployed", 
-      description: `${formData.title} is now live in the course catalog.` 
+      description: `${formData.title} is now active in the client's catalog.` 
     });
     
     setFormData({ 
@@ -94,7 +94,7 @@ export default function CurriculumManager() {
     deleteDocumentNonBlocking(doc(db, 'modules', id));
     toast({ 
       title: "Module Decommissioned",
-      description: `Removing ${title} from the curriculum.`
+      description: `Removing ${title} from the client environment.`
     });
   };
 
@@ -102,13 +102,15 @@ export default function CurriculumManager() {
     <div className="p-8 max-w-6xl mx-auto space-y-10">
       <header className="flex justify-between items-end">
         <div className="space-y-1">
-          <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em]">Administration Terminal</p>
+          <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em] flex items-center gap-2">
+            <Terminal className="w-3 h-3" /> Builder Command Center
+          </p>
           <h1 className="text-4xl font-headline font-bold text-[#004B40]">Strategic Control</h1>
-          <p className="text-muted-foreground font-medium">Manage curriculum and provision institutional AI licenses.</p>
+          <p className="text-muted-foreground font-medium">Manage client curriculum and provision institutional capacity.</p>
         </div>
         <Button 
           onClick={() => setShowForm(!showForm)}
-          className={`rounded-2xl h-12 font-bold transition-all ${showForm ? 'bg-muted text-muted-foreground hover:bg-muted/80' : 'bg-[#004B40] hover:bg-[#004B40]/90 text-white shadow-lg shadow-green-900/20'}`}
+          className={`rounded-2xl h-12 font-bold transition-all ${showForm ? 'bg-muted text-muted-foreground hover:bg-muted/80' : 'bg-[#FF671F] hover:bg-[#FF671F]/90 text-white shadow-lg shadow-orange-900/20'}`}
         >
           {showForm ? <><X className="w-4 h-4 mr-2" /> Cancel</> : <><Plus className="w-4 h-4 mr-2" /> New Module</>}
         </Button>
@@ -120,11 +122,11 @@ export default function CurriculumManager() {
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
               <Users className="w-6 h-6 text-[#FF671F]" />
-              <span className="text-[9px] font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">Institutional Licenses</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">Active Capacity</span>
             </div>
             <div>
-              <p className="text-3xl font-headline font-bold">{licenseConfig?.activeLicenses || 0} / {licenseConfig?.totalLicenses || 3}</p>
-              <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">Active Faculty Accounts</p>
+              <p className="text-3xl font-headline font-bold">{licenseConfig?.activeLicenses || 0} / {licenseConfig?.totalLicenses || 0}</p>
+              <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">Faculty Licenses In Use</p>
             </div>
           </div>
         </Card>
@@ -132,17 +134,17 @@ export default function CurriculumManager() {
         <Card className="bg-white border-none rounded-[2.5rem] p-6 shadow-sm border border-muted/50 col-span-2 flex items-center justify-between gap-6">
           <div className="space-y-1">
             <h3 className="font-bold text-[#004B40] flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#FF671F]" /> Provision Licenses
+              <TrendingUp className="w-4 h-4 text-[#FF671F]" /> Modify Provisioning
             </h3>
-            <p className="text-xs text-muted-foreground font-medium">Update the total number of faculty accounts permitted.</p>
+            <p className="text-xs text-muted-foreground font-medium">Set the total faculty licenses for this client instance.</p>
           </div>
           <div className="flex gap-3">
-            <Input 
+            <input 
               type="number" 
               placeholder="e.g. 10" 
               value={newTotalLicenses}
               onChange={e => setNewTotalLicenses(e.target.value)}
-              className="w-24 h-12 rounded-xl bg-muted/30 border-none font-bold"
+              className="w-24 h-12 rounded-xl bg-muted/30 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-[#FF671F] outline-none"
             />
             <Button onClick={handleUpdateLicenses} className="h-12 px-6 rounded-xl bg-[#004B40] text-white font-bold hover:bg-[#004B40]/90">
               Update Cap
@@ -155,19 +157,19 @@ export default function CurriculumManager() {
         <Card className="border-none shadow-2xl rounded-[2.5rem] animate-in slide-in-from-top-4 duration-500 overflow-hidden bg-white">
           <div className="h-2 bg-[#FF671F]" />
           <CardHeader>
-            <CardTitle className="text-2xl font-headline text-[#004B40]">Unit Configuration</CardTitle>
-            <CardDescription>Configure the metadata and AI Lab task for this institutional learning module.</CardDescription>
+            <CardTitle className="text-2xl font-headline text-[#004B40]">Deploy New Unit</CardTitle>
+            <CardDescription>Populate the curriculum for the institutional faculty.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Module Title</label>
-                  <Input 
+                  <input 
                     value={formData.title} 
                     onChange={e => setFormData({...formData, title: e.target.value})}
                     placeholder="e.g., AI-Assisted Grant Writing"
-                    className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
+                    className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                     required
                   />
                 </div>
@@ -191,11 +193,11 @@ export default function CurriculumManager() {
               
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Module Description</label>
-                <Textarea 
+                <textarea 
                   value={formData.description} 
                   onChange={e => setFormData({...formData, description: e.target.value})}
                   placeholder="What will faculty master in this unit?"
-                  className="rounded-xl bg-muted/30 border-none h-24 focus-visible:ring-[#FF671F]"
+                  className="w-full flex min-h-[100px] rounded-xl bg-muted/30 border-none p-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none resize-none"
                   required
                 />
               </div>
@@ -204,11 +206,11 @@ export default function CurriculumManager() {
                 <label className="text-[10px] font-bold uppercase text-[#004B40] tracking-widest flex items-center gap-2">
                   <Zap className="w-3 h-3 text-[#FF671F]" /> AI Lab Active Task
                 </label>
-                <Textarea 
+                <textarea 
                   value={formData.labTask} 
                   onChange={e => setFormData({...formData, labTask: e.target.value})}
                   placeholder="Describe the specific prompt or task the user should complete in the AI sidebar."
-                  className="rounded-xl bg-white border-none h-24 focus-visible:ring-[#FF671F]"
+                  className="w-full flex min-h-[100px] rounded-xl bg-white border-none p-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none resize-none"
                   required
                 />
               </div>
@@ -216,36 +218,36 @@ export default function CurriculumManager() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Strategic Category</label>
-                  <Input 
+                  <input 
                     value={formData.category} 
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     placeholder="e.g., Academic Innovation"
-                    className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
+                    className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Duration</label>
-                  <Input 
+                  <input 
                     value={formData.duration} 
                     onChange={e => setFormData({...formData, duration: e.target.value})}
                     placeholder="e.g., 45 mins"
-                    className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
+                    className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Resource Link (Video)</label>
-                  <Input 
+                  <input 
                     value={formData.videoUrl} 
                     onChange={e => setFormData({...formData, videoUrl: e.target.value})}
                     placeholder="YouTube or Vimeo URL"
-                    className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-[#FF671F]"
+                    className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-muted">
-                <Button type="submit" className="h-14 px-10 rounded-2xl bg-[#FF671F] hover:bg-[#FF671F]/90 text-white font-headline font-bold shadow-xl shadow-orange-900/20">
-                  Deploy to Catalog
+                <Button type="submit" className="h-14 px-10 rounded-2xl bg-[#004B40] hover:bg-[#004B40]/90 text-white font-headline font-bold shadow-xl">
+                  Push to Catalog
                 </Button>
               </div>
             </form>
@@ -255,7 +257,7 @@ export default function CurriculumManager() {
 
       <div className="space-y-6">
         <h3 className="text-xl font-headline font-bold text-[#004B40] flex items-center gap-2">
-          <LayoutGrid className="w-5 h-5 text-[#FF671F]" /> Active Curriculum Inventory
+          <LayoutGrid className="w-5 h-5 text-[#FF671F]" /> Deployed Curriculum Inventory
         </h3>
         
         {isLoading ? (
@@ -299,7 +301,7 @@ export default function CurriculumManager() {
           </div>
         ) : (
           <Card className="border-dashed border-2 bg-transparent p-12 text-center rounded-[2.5rem]">
-            <p className="text-muted-foreground font-medium italic">No modules deployed. Click "New Module" to begin populating the curriculum.</p>
+            <p className="text-muted-foreground font-medium italic">Client curriculum is empty. Deploy a module to begin.</p>
           </Card>
         )}
       </div>
