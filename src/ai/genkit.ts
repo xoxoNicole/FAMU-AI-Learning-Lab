@@ -5,6 +5,7 @@ import { vertexAI } from '@genkit-ai/vertexai';
 export const ai = genkit({
   plugins: [
     googleAI({
+      // Using the custom GEMINI_API_KEY to avoid Firebase reserved name conflicts
       apiKey: process.env.GEMINI_API_KEY,
     }),
     vertexAI({
