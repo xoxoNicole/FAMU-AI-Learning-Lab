@@ -32,10 +32,15 @@ export default function DashboardLayout({
 
   if (isUserLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-background">
+      <div className="h-svh w-screen flex items-center justify-center bg-background animate-in fade-in duration-500">
         <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-[#004B40] mx-auto" />
-          <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-[0.3em]">Initializing Lab Session...</p>
+          <div className="relative">
+            <Loader2 className="w-12 h-12 animate-spin text-[#004B40] mx-auto opacity-20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 bg-[#FF671F] rounded-full animate-pulse" />
+            </div>
+          </div>
+          <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-[0.3em] animate-pulse">Initializing Lab Session...</p>
         </div>
       </div>
     );
@@ -46,7 +51,7 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-svh bg-background overflow-hidden animate-in fade-in duration-700">
       <Sidebar />
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Subtle decorative elements */}

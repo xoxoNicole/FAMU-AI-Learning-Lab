@@ -26,6 +26,12 @@ export default function LoginPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
+  // Prefetch dashboard for instant transition
+  useEffect(() => {
+    router.prefetch('/dashboard');
+    router.prefetch('/dashboard/modules');
+  }, [router]);
+
   const licenseRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'system', 'license');
@@ -37,7 +43,8 @@ export default function LoginPage() {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && !loading) {
-        router.push('/dashboard');
+        // Use replace for a smoother, one-way transition
+        router.replace('/dashboard');
       }
     });
     return () => unsubscribe();
