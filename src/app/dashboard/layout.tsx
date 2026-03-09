@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect } from 'react';
@@ -20,6 +21,7 @@ export default function DashboardLayout({
 
   // Protect dashboard routes: Redirect to login if not authenticated
   useEffect(() => {
+    // Only redirect if we are certain the user is not logged in
     if (!isUserLoading && !user) {
       router.replace('/login');
     }
@@ -29,9 +31,10 @@ export default function DashboardLayout({
   const pathParts = pathname.split('/').filter(Boolean);
   const isHome = pathname === '/dashboard';
 
+  // If we are loading the user, show a consistent loader
   if (isUserLoading) {
     return (
-      <div className="h-svh w-screen flex items-center justify-center bg-background animate-in fade-in duration-500">
+      <div className="h-svh w-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="relative">
             <Loader2 className="w-12 h-12 animate-spin text-[#004B40] mx-auto opacity-20" />
@@ -45,8 +48,7 @@ export default function DashboardLayout({
     );
   }
 
-  // If not loading and no user, the useEffect will handle redirect. 
-  // We return null here to prevent flashing protected content.
+  // If not loading and no user, we return null while the redirect happens
   if (!user) return null;
 
   return (

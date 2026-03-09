@@ -30,7 +30,6 @@ export default function LoginPage() {
   // Prefetch dashboard for instant transition
   useEffect(() => {
     router.prefetch('/dashboard');
-    router.prefetch('/dashboard/modules');
   }, [router]);
 
   // Global redirect: if user is authenticated, move to dashboard immediately
@@ -107,10 +106,13 @@ export default function LoginPage() {
           title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
           description: "Your institutional access is active. Redirecting..." 
         });
-        // Success: the global useEffect will handle the final redirect to /dashboard
+        
+        // Explicitly trigger navigation to bypass any background listener lag
+        router.replace('/dashboard');
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        // Success: the global useEffect will handle the final redirect to /dashboard
+        // Explicitly trigger navigation to bypass any background listener lag
+        router.replace('/dashboard');
       }
     } catch (err: any) {
       toast({
@@ -124,7 +126,7 @@ export default function LoginPage() {
 
   const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
 
-  // Don't show the login form if we're already redirecting
+  // Don't show the login form if we're already authenticated
   if (user && !isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#004B40]">
