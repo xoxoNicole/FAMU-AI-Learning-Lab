@@ -47,9 +47,9 @@ export default function ProfilePage() {
         updatedAt: new Date().toISOString()
       });
 
-      toast({ title: "Profile Refined", description: "Your institutional credentials have been updated." });
+      toast({ title: "Profile Updated", description: "Your account details have been successfully synchronized." });
     } catch (err) {
-      toast({ variant: "destructive", title: "Update Failed", description: "Could not sync your changes to the Strike Team repository." });
+      toast({ variant: "destructive", title: "Update Failed", description: "There was an error saving your changes." });
     } finally {
       setLoading(false);
     }
@@ -58,16 +58,16 @@ export default function ProfilePage() {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-10">
       <header>
-        <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em]">Identity Hub</p>
-        <h1 className="text-4xl font-headline font-bold text-[#004B40]">Account Settings</h1>
-        <p className="text-muted-foreground font-medium">Manage your institutional presence in the AI Literacy Lab.</p>
+        <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em]">Account Management</p>
+        <h1 className="text-4xl font-headline font-bold text-[#004B40]">Settings</h1>
+        <p className="text-muted-foreground font-medium">Manage your profile and institutional access settings.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
           <Card className="border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden">
             <CardHeader className="border-b border-muted">
-              <CardTitle className="text-xl font-headline text-[#004B40]">Personal Credentials</CardTitle>
+              <CardTitle className="text-xl font-headline text-[#004B40]">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <form onSubmit={handleUpdate} className="space-y-6">
@@ -90,13 +90,13 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Institutional Email</label>
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Email Address</label>
                   <Input 
                     value={user?.email || ''} 
                     disabled 
                     className="h-12 rounded-xl bg-muted/20 border-none opacity-60 cursor-not-allowed" 
                   />
-                  <p className="text-[9px] text-muted-foreground font-bold italic">Email changes must be authorized by the Strike Team.</p>
+                  <p className="text-[9px] text-muted-foreground font-medium italic">Institutional emails are managed by the system administrator.</p>
                 </div>
                 <Button 
                   type="submit" 
@@ -116,7 +116,7 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-4">
-              <p className="text-sm text-muted-foreground font-medium">To maintain "Strike from the Top" security, password resets are handled via FAMU institutional protocols.</p>
+              <p className="text-sm text-muted-foreground font-medium">Password resets are handled via FAMU institutional security protocols.</p>
               <Button variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
                 Reset Password via Email
               </Button>
@@ -133,20 +133,12 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-white/10 border border-white/10">
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60 mb-1">Tier</p>
-                <p className="font-bold text-sm">Full Institutional Faculty</p>
+                <p className="font-bold text-sm">Limited License</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/10 border border-white/10">
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60 mb-1">Provisioned</p>
-                <p className="font-bold text-sm">2024–2025 Academic Cycle</p>
+                <p className="font-bold text-sm">2026 Spring/Summer</p>
               </div>
-            </div>
-          </Card>
-
-          <Card className="border-none p-6 rounded-[2rem] bg-amber-50 border border-amber-100 flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-1" />
-            <div className="space-y-1">
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Antigravity Note</p>
-              <p className="text-[11px] text-amber-800 leading-relaxed font-medium">Your account is grounded in the FAMU proprietary IP store. Your data is never used to train external public models.</p>
             </div>
           </Card>
         </div>
