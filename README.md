@@ -28,7 +28,7 @@ git push -u origin main
 ```
 
 ### 4. Return to the Firebase Console
-Once the commands finish, return to the Firebase setup screen. Click "Refresh list" or simply type `main` again in the branch box. It should now be recognized and turn blue.
+Once the commands finish (you should see a "Total..." message in the terminal), return to the Firebase setup screen. Click "Refresh list" or simply type `main` again in the branch box. It should now be recognized and turn blue.
 
 ## 🛠 Tech Stack
 - **AI**: Genkit with Vertex AI (Gemini 1.5 Pro)
