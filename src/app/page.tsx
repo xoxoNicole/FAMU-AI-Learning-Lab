@@ -48,7 +48,7 @@ export default function LandingPage() {
               <span className="text-[#FF671F]">Excellence.</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-lg font-medium">
-              A specialized platform empowering academic leaders to refine grant proposals, draft strategic institutional content, and leverage AI with professional precision.
+              A specialized portal empowering academic leaders to refine strategic proposals, draft institutional content, and leverage AI with professional precision.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link href="/login">
@@ -75,7 +75,7 @@ export default function LandingPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#004B40]/80 via-transparent to-transparent" />
               <div className="absolute bottom-8 left-8 right-8 text-white">
-                <p className="text-4xl font-headline font-bold leading-tight">Advanced Literacy for Higher Education.</p>
+                <p className="text-4xl font-headline font-bold leading-tight">Advanced AI Literacy for Academic Leadership.</p>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
             <div className="max-w-2xl">
               <h2 className="text-4xl font-headline font-bold text-[#004B40] mb-4">Core Capabilities</h2>
-              <p className="text-muted-foreground text-lg font-medium">Designed for the unique challenges of modern academic administration.</p>
+              <p className="text-muted-foreground text-lg font-medium">Designed for the unique strategic challenges of modern higher education administration.</p>
             </div>
             <div className="h-px flex-1 bg-[#004B40]/10 mx-8 hidden md:block" />
           </div>
@@ -97,19 +97,19 @@ export default function LandingPage() {
               {
                 icon: BookOpen,
                 title: "Specialized Curriculum",
-                desc: "Strategic lessons curated for the HBCU administrative landscape.",
+                desc: "Strategic modules curated specifically for the FAMU institutional landscape.",
                 color: "bg-[#004B40]"
               },
               {
                 icon: Sparkles,
                 title: "Drafting Assistant",
-                desc: "Efficiency tools to help generate first drafts of memos, reports, and proposals.",
+                desc: "Efficiency tools to help generate high-quality drafts of memos, reports, and strategic plans.",
                 color: "bg-[#FF671F]"
               },
               {
                 icon: Target,
                 title: "Strategy Lab",
-                desc: "Interactive environment to stress-test initiatives and refine institutional goals.",
+                desc: "An interactive environment to refine institutional objectives and stress-test initiatives.",
                 color: "bg-[#004B40]"
               }
             ].map((feature, i) => (
@@ -134,8 +134,8 @@ export default function LandingPage() {
                 <ShieldCheck className="w-8 h-8 text-[#004B40]" />
               </div>
               <div>
-                <p className="font-headline font-bold text-[#004B40] text-lg uppercase tracking-tight">Enterprise Standard</p>
-                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Data Privacy and Institutional Security</p>
+                <p className="font-headline font-bold text-[#004B40] text-lg uppercase tracking-tight">Institutional Standard</p>
+                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Enterprise Data Privacy and Security</p>
               </div>
             </div>
             <div className="flex gap-12 font-headline font-bold text-[#004B40]/40 text-sm uppercase tracking-[0.3em]">
