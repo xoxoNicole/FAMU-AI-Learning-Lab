@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth, useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
@@ -22,6 +22,7 @@ export default function LoginPage() {
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -35,7 +36,11 @@ export default function LoginPage() {
   // Global redirect: if user is authenticated, move to dashboard immediately
   useEffect(() => {
     if (user && !isUserLoading) {
-      router.replace('/dashboard');
+      setSuccess(true);
+      const timer = setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [user, isUserLoading, router]);
 
@@ -106,14 +111,10 @@ export default function LoginPage() {
           title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
           description: "Your institutional access is active. Redirecting..." 
         });
-        
-        // Explicitly trigger navigation to bypass any background listener lag
-        router.replace('/dashboard');
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        // Explicitly trigger navigation to bypass any background listener lag
-        router.replace('/dashboard');
       }
+      setSuccess(true);
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -126,13 +127,18 @@ export default function LoginPage() {
 
   const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
 
-  // Don't show the login form if we're already authenticated
-  if (user && !isUserLoading) {
+  // Don't show the login form if we're already authenticated and verified
+  if (user && !isUserLoading && success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#004B40]">
         <div className="text-center space-y-4">
-          <Loader2 className="w-10 h-10 animate-spin text-white mx-auto opacity-20" />
-          <p className="text-[10px] font-bold text-white uppercase tracking-[0.3em] animate-pulse">Entering Lab...</p>
+          <div className="relative">
+            <Loader2 className="w-12 h-12 animate-spin text-white mx-auto opacity-20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Check className="w-6 h-6 text-[#FF671F]" />
+            </div>
+          </div>
+          <p className="text-[10px] font-bold text-white uppercase tracking-[0.3em] animate-pulse">Entering Lab Workspace...</p>
         </div>
       </div>
     );
@@ -232,10 +238,10 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                disabled={loading || (isSignUp && licensesRemaining <= 0 && !email.toLowerCase().endsWith('@themogulfactory.co') && (licenseConfig?.totalLicenses ?? 0) > 0)}
+                disabled={loading || success || (isSignUp && licensesRemaining <= 0 && !email.toLowerCase().endsWith('@themogulfactory.co') && (licenseConfig?.totalLicenses ?? 0) > 0)}
                 className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : success ? <Check className="w-6 h-6" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
               </Button>
             </form>
 

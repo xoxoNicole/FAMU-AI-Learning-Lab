@@ -49,7 +49,13 @@ export default function DashboardLayout({
   }
 
   // If not loading and no user, we return null while the redirect happens
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="h-svh w-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-[#004B40] opacity-20" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-svh bg-background overflow-hidden animate-in fade-in duration-700">
