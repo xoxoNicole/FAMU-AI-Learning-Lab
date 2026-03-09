@@ -1,32 +1,25 @@
-# FAMU AI Literacy Lab | Antigravity Edition
+# FAMU AI Literacy Lab | Strategic Portal
 
-This is the strategic administrative laboratory for Florida A&M University, powered by Vertex AI and Nicole's Digital Twin.
+This laboratory empowers Florida A&M University faculty with strategic AI literacy and administrative drafting capabilities.
 
-## 🚀 Antigravity Deployment & GitHub Integration
+## 🚀 Deployment Instructions
 
-To push this project to your GitHub and begin the Antigravity maintenance loop:
+To launch this project, you must first push your code from IDX to GitHub.
 
-1. **Initialize Git & Push to GitHub**:
+1. **Create a new repository on GitHub** (e.g., `famu-ai-lab`). Do not initialize it with a README or License.
+2. **Open the Terminal in IDX** (bottom panel) and run the following commands:
    ```bash
    git init
    git add .
-   git commit -m "Initialize AI Literacy Lab with Vertex AI Digital Twin"
+   git commit -m "Initial commit"
    git branch -M main
    git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
    git push -u origin main
    ```
-
-2. **Configure Vertex AI Grounding**:
-   - Create a Google Cloud Storage bucket named `nicole-ip-memory`.
-   - Upload your proprietary PDFs/transcripts.
-   - Connect the bucket to **Vertex AI Search and Conversation** in the Google Cloud Console.
-
-3. **Maintenance Loop**:
-   - Use the **Digital Twin Lab** in the dashboard to test Nicole's responses.
-   - Use the "Antigravity Maintenance" button in the UI to view logs and refinement metrics.
+3. **Return to the Firebase Console** and click "Next" or re-type `main`. The console will now recognize your code.
 
 ## 🛠 Tech Stack
 - **AI**: Genkit with Vertex AI (Gemini 1.5 Pro)
 - **Framework**: Next.js 15 (App Router)
-- **Database**: Firestore (Grounded RAG)
-- **Styling**: Tailwind CSS & ShadCN UI
+- **Database**: Firestore
+- **Deployment**: Firebase App Hosting

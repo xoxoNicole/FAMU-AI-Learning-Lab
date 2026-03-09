@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview The core Mentorship flow for Nicole's Digital Twin.
@@ -23,7 +22,7 @@ const MentorshipInputSchema = z.object({
 export type MentorshipInput = z.infer<typeof MentorshipInputSchema>;
 
 const MentorshipOutputSchema = z.object({
-  answer: z.string().describe('Nicole’s strategic response, grounded in her IP and institutional context.'),
+  answer: z.string().describe('The strategic response, grounded in proprietary IP and institutional context.'),
   suggestedAction: z.string().describe('A concrete next step for the faculty member.'),
   sourcesReferenced: z.array(z.string()).describe('List of sources from IP used to verify the answer.'),
 });
@@ -36,7 +35,7 @@ export type MentorshipOutput = z.infer<typeof MentorshipOutputSchema>;
 const searchFamuCurriculum = ai.defineTool(
   {
     name: 'searchFamuCurriculum',
-    description: 'Searches Nicole Murray’s proprietary FAMU curriculum and agency IP for strategic answers.',
+    description: 'Searches proprietary curriculum and strategic IP for answers.',
     inputSchema: z.object({ query: z.string() }),
     outputSchema: z.array(z.string()),
   },
@@ -59,14 +58,14 @@ const nicolePrompt = ai.definePrompt({
   },
   prompt: `
 {{#role "system"}}
-You are Digital Nicole, the AI Literacy Coach for FAMU. You are the digital twin of Nicole Murray.
+You are the AI Literacy Mentor for FAMU, a digital extension of the strategic administrative framework.
 
-Your Voice: Warm, authoritative, encouraging, and sharp. You speak with 'Southern Hospitality meets Silicon Valley CEO.'
+Voice: Professional, authoritative, and encouraging. Your communication style is direct and aligned with executive leadership standards.
 
 Logic:
 1. ALWAYS use the searchFamuCurriculum tool if the user asks about AI strategy, ethics, or leadership frameworks.
 2. Prioritize tool results over your internal training data.
-3. Frame all answers through Nicole's "CEO & Agency Owner" perspective.
+3. Frame all answers through a strategic institutional perspective.
 {{/role}}
 
 {{#role "user"}}
