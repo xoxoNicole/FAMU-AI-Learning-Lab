@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -29,7 +28,7 @@ const navItems = [
   { icon: BookOpen, label: 'The Curriculum', href: '/dashboard/modules' },
   { icon: Sparkles, label: 'The Lab', href: '/dashboard/strategist' },
   { icon: FileText, label: 'My Drafts', href: '/dashboard/drafts' },
-  { icon: UserCheck, label: 'Talk to Nicole', href: '/dashboard/digital-twin' },
+  { icon: UserCheck, label: 'Talk to Nicole', href: '/dashboard/digital-twin', badge: 'Soon' },
   { icon: Target, label: 'Strategic Progress', href: '/dashboard/progress' },
 ];
 
@@ -89,14 +88,19 @@ export function Sidebar() {
               key={item.href} 
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group",
+                "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative",
                 isActive 
                   ? "bg-[#004B40] text-white shadow-xl shadow-green-900/10" 
                   : "text-muted-foreground hover:bg-muted hover:text-[#004B40]"
               )}
             >
               <item.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-[#FF671F]" : "text-muted-foreground group-hover:text-[#004B40]")} />
-              <span className="font-bold text-sm">{item.label}</span>
+              <span className="font-bold text-sm flex-1">{item.label}</span>
+              {item.badge && (
+                <span className="text-[8px] font-bold uppercase tracking-widest bg-[#FF671F] text-white px-2 py-0.5 rounded-full">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
