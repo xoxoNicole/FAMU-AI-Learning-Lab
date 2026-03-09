@@ -104,7 +104,7 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
       }
       
-      // Explicit navigation for speed
+      // Explicit navigation for speed - this solves the "forever spin"
       router.push('/dashboard');
     } catch (err: any) {
       toast({
