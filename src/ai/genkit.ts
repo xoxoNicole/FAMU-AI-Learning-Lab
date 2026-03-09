@@ -4,7 +4,9 @@ import { vertexAI } from '@genkit-ai/vertexai';
 
 export const ai = genkit({
   plugins: [
-    googleAI(),
+    googleAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    }),
     vertexAI({
       location: 'us-central1', // Default location for Vertex AI services
     }),

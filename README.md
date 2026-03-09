@@ -2,17 +2,20 @@
 
 This laboratory empowers Florida A&M University faculty with strategic AI literacy and administrative drafting capabilities.
 
-## 🏁 Final Launch Checklist - COMPLETE
+## 🏁 Final Launch Checklist
 
 Congratulations! You have successfully deployed the institutional portal. Below is your verification guide.
 
-### 1. 🔐 AI "Secret" Key - VERIFIED
-Your AI features (Nicole, Drafting, etc.) are now powered by your private Gemini key.
-- **Location**: Firebase Console > App Hosting > `famu-ai-literacy-lab` > **Environment**.
-- **Status**: `GOOGLE_GENAI_API_KEY` added as a Secret.
+### 1. 🔐 AI "Secret" Key - REQUIRED
+Your AI features (Nicole, Drafting, etc.) are powered by your private Gemini key. Because Firebase reserves certain names, we use a custom name.
+- **Go to**: Firebase Console > App Hosting > `famu-ai-literacy-lab` > **Environment**.
+- **Action**: Click "Add variable".
+- **Key**: `GEMINI_API_KEY` (Important: Do not use GOOGLE_ prefix).
+- **Value**: Paste your key from Google AI Studio.
+- **Type**: Select **Secret**.
 
 ### 2. 🌐 DNS Configuration (GoDaddy) - VERIFIED
-The domain `famu.theaiacademy.co` is now associated with the following records:
+The domain `famu.theaiacademy.co` should be associated with the following records in GoDaddy:
 - **A Record**: `famu` -> `35.219.200.0`
 - **TXT Record**: `famu` -> `fah-claim=002...`
 - **CNAME**: `_acme-challenge...` -> `5b0e...`
