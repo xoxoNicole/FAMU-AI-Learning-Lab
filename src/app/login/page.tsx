@@ -37,10 +37,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (user && !isUserLoading) {
       setSuccess(true);
-      const timer = setTimeout(() => {
-        router.push('/dashboard');
-      }, 500);
-      return () => clearTimeout(timer);
+      router.replace('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
@@ -114,7 +111,10 @@ export default function LoginPage() {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
+      
       setSuccess(true);
+      // Explicit navigation for speed
+      router.replace('/dashboard');
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -127,8 +127,8 @@ export default function LoginPage() {
 
   const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
 
-  // Don't show the login form if we're already authenticated and verified
-  if (user && !isUserLoading && success) {
+  // Don't show the login form if we're already authenticated
+  if (user && success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#004B40]">
         <div className="text-center space-y-4">

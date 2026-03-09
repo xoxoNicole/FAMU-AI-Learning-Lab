@@ -31,8 +31,10 @@ export default function DashboardLayout({
   const pathParts = pathname.split('/').filter(Boolean);
   const isHome = pathname === '/dashboard';
 
-  // If we are loading the user, show a consistent loader
-  if (isUserLoading) {
+  // If we are loading the user AND we don't have a user object yet, show a consistent loader.
+  // If we have a user object, we can proceed even if the initial "loading" state is true
+  // to prevent a flickering white screen or "forever spinning" during transitions.
+  if (isUserLoading && !user) {
     return (
       <div className="h-svh w-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
@@ -50,11 +52,7 @@ export default function DashboardLayout({
 
   // If not loading and no user, we return null while the redirect happens
   if (!user) {
-    return (
-      <div className="h-svh w-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-10 h-10 animate-spin text-[#004B40] opacity-20" />
-      </div>
-    );
+    return null;
   }
 
   return (
