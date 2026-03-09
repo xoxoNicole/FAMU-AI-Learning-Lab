@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle, Check } from 'lucide-react';
+import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth, useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
@@ -18,7 +18,7 @@ export default function LoginPage() {
   const auth = useAuth();
   const db = useFirestore();
   const { toast } = useToast();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ export default function LoginPage() {
   // Global redirect: if user is authenticated, move to dashboard immediately
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [user, router]);
 
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
         toast({ 
           title: "Account Created", 
-          description: "Redirecting to your dashboard..." 
+          description: "Entering the dashboard..." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
