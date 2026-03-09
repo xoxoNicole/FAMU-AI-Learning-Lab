@@ -102,8 +102,25 @@ export default function LoginPage() {
         });
         router.push('/dashboard');
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        // Navigate to dashboard immediately — auth completes in background.
+        // sessionStorage flag tells the dashboard to hold and not redirect to login
+        // while Firebase finishes verifying credentials.
+        sessionStorage.setItem('authPending', '1');
+        const authPromise = signInWithEmailAndPassword(auth, email, password);
         router.push('/dashboard');
+        try {
+          await authPromise;
+          sessionStorage.removeItem('authPending');
+        } catch (err: any) {
+          sessionStorage.removeItem('authPending');
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: err.message || "Failed to authenticate."
+          });
+          router.replace('/login');
+        }
+        return;
       }
     } catch (err: any) {
       toast({

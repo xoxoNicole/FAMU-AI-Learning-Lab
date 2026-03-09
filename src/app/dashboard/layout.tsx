@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -20,15 +20,25 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
 
-  // Protect dashboard routes: Redirect to login if not authenticated.
-  // Also check auth.currentUser synchronously — Firebase sets this immediately after
-  // signInWithEmailAndPassword resolves, before onAuthStateChanged fires. Without this,
-  // navigating to /dashboard right after sign-in triggers a redirect loop back to /login.
+  // True if the login page started a sign-in and navigated here optimistically
+  // before Firebase finished verifying credentials.
+  const [authPending] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem('authPending') === '1';
+  });
+
+  // Clear the flag once the user is confirmed in React context.
   useEffect(() => {
-    if (!isUserLoading && !user && !auth.currentUser) {
+    if (user) sessionStorage.removeItem('authPending');
+  }, [user]);
+
+  // Only redirect to login when we are certain there is no active session
+  // and no sign-in is in progress.
+  useEffect(() => {
+    if (!isUserLoading && !user && !auth.currentUser && !authPending) {
       router.replace('/login');
     }
-  }, [user, isUserLoading, auth, router]);
+  }, [user, isUserLoading, auth, router, authPending]);
 
   // Simple breadcrumb logic
   const pathParts = pathname.split('/').filter(Boolean);
@@ -98,9 +108,8 @@ export default function DashboardLayout({
     );
   }
 
-  // Show loader while waiting for auth state — includes the brief gap where
-  // auth.currentUser is set but onAuthStateChanged hasn't updated React context yet.
-  if (isUserLoading || auth.currentUser) {
+  // Show loader while: initial auth check, auth.currentUser sync gap, or sign-in in progress.
+  if (isUserLoading || auth.currentUser || authPending) {
     return (
       <div className="h-svh w-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
