@@ -27,8 +27,11 @@ git remote add origin https://github.com/xoxoNicole/FAMU-AI-Learning-Lab.git
 git push -u origin main
 ```
 
-### 4. Return to the Firebase Console
-Once the commands finish (you should see a "Total..." message in the terminal), return to the Firebase setup screen. Click "Refresh list" or simply type `main` again in the branch box. It should now be recognized and turn blue.
+### 4. Firebase Console Configuration
+When prompted in the Firebase Console:
+- **Live branch**: Type `main`
+- **App root directory**: Type `/`
+- **Backend ID**: Type `famu-ai-literacy-lab`
 
 ## 🛠 Tech Stack
 - **AI**: Genkit with Vertex AI (Gemini 1.5 Pro)
