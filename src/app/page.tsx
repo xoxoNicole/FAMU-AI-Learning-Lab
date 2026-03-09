@@ -13,7 +13,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background selection:bg-accent/30 overflow-x-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-muted">
-        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-28 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-[#004B40] flex items-center justify-center shadow-lg">
               <Sparkles className="w-7 h-7 text-white" />

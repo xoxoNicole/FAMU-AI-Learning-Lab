@@ -141,7 +141,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3">
             <Sparkles className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter">AI Learning Lab</h1>
+          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter leading-none">AI Learning Lab</h1>
           <p className="text-white/70 font-body text-[10px] uppercase tracking-[0.2em] font-bold">FLORIDA A & M UNIVERSITY</p>
           <p className="text-brand-pink font-body text-[8px] uppercase tracking-widest font-bold mt-2">POWERED BY THE AI ACADEMY AT MOGUL SCHOOL</p>
         </div>
