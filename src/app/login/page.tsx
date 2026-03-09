@@ -96,16 +96,15 @@ export default function LoginPage() {
           }, { merge: true });
         }
 
-        toast({ 
-          title: "Account Created", 
-          description: "Entering the dashboard..." 
+        toast({
+          title: "Account Created",
+          description: "Entering the dashboard..."
         });
+        router.push('/dashboard');
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        router.push('/dashboard');
       }
-      
-      // Explicit navigation for speed - this solves the "forever spin"
-      router.push('/dashboard');
     } catch (err: any) {
       toast({
         variant: "destructive",

@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Home, User, Bell, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import Link from 'next/link';
 
 export default function DashboardLayout({
@@ -18,21 +18,24 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
 
-  // Protect dashboard routes: Redirect to login if not authenticated
+  // Protect dashboard routes: Redirect to login if not authenticated.
+  // Also check auth.currentUser synchronously — Firebase sets this immediately after
+  // signInWithEmailAndPassword resolves, before onAuthStateChanged fires. Without this,
+  // navigating to /dashboard right after sign-in triggers a redirect loop back to /login.
   useEffect(() => {
-    // Only redirect if we are certain the user is not logged in and initialization is complete
-    if (!isUserLoading && !user) {
+    if (!isUserLoading && !user && !auth.currentUser) {
       router.replace('/login');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, auth, router]);
 
   // Simple breadcrumb logic
   const pathParts = pathname.split('/').filter(Boolean);
   const isHome = pathname === '/dashboard';
 
-  // OPTIMIZATION: If the user object exists, render the dashboard immediately.
-  // This avoids the "forever spinning" loading screen during the final SDK handshake.
+  // Render dashboard if React state has the user, OR if auth.currentUser is set
+  // (i.e. onAuthStateChanged hasn't updated context yet but Firebase already authenticated).
   if (user) {
     return (
       <div className="flex h-svh bg-background overflow-hidden animate-in fade-in duration-700">
@@ -95,8 +98,9 @@ export default function DashboardLayout({
     );
   }
 
-  // Only show the global loader if we are truly waiting for the first auth check
-  if (isUserLoading) {
+  // Show loader while waiting for auth state — includes the brief gap where
+  // auth.currentUser is set but onAuthStateChanged hasn't updated React context yet.
+  if (isUserLoading || auth.currentUser) {
     return (
       <div className="h-svh w-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
