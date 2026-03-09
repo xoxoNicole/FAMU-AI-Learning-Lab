@@ -3,14 +3,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, increment } from 'firebase/firestore';
-import { setDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
@@ -53,7 +52,6 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        // License Check only for Faculty (Non-Builders)
         if (!isBuilderDomain) {
           const total = licenseConfig?.totalLicenses ?? 3;
           const active = licenseConfig?.activeLicenses ?? 0;
@@ -62,7 +60,7 @@ export default function LoginPage() {
             toast({
               variant: "destructive",
               title: "License Capacity Reached",
-              description: "All institutional faculty licenses are currently provisioned. Contact the Builder."
+              description: "All institutional faculty licenses are currently provisioned."
             });
             setLoading(false);
             return;
@@ -76,10 +74,8 @@ export default function LoginPage() {
           displayName: `${firstName} ${lastName}`
         });
 
-        // Assign Role based on Domain
         const role = isBuilderDomain ? 'admin' : 'faculty';
 
-        // Create Profile in Firestore
         setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
           id: user.uid,
           email: user.email,
@@ -90,20 +86,12 @@ export default function LoginPage() {
           updatedAt: new Date().toISOString()
         }, { merge: true });
 
-        // Update License if Faculty
         if (role === 'faculty') {
-          const licenseUpdate: any = {
+          setDocumentNonBlocking(doc(db, 'system', 'license'), {
             activeLicenses: increment(1),
             updatedAt: new Date().toISOString()
-          };
-          
-          // Ensure base license doc exists if first user is faculty
-          if (!licenseConfig) {
-            licenseUpdate.totalLicenses = 3;
-          }
-          setDocumentNonBlocking(doc(db, 'system', 'license'), licenseUpdate, { merge: true });
+          }, { merge: true });
         } else if (isBuilderDomain && !licenseConfig) {
-          // If first user is Builder, seed the license config
           setDocumentNonBlocking(doc(db, 'system', 'license'), {
             totalLicenses: 3,
             activeLicenses: 0,
@@ -112,8 +100,8 @@ export default function LoginPage() {
         }
 
         toast({ 
-          title: role === 'admin' ? "Builder Terminal Accessed" : "License Provisioned", 
-          description: role === 'admin' ? "Welcome to the Strategic Command Center." : "Your institutional access is active." 
+          title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
+          description: "Your institutional access is active." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -122,7 +110,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: err.message || "Failed to authenticate with the Strike Team server."
+        description: err.message || "Failed to authenticate."
       });
       setLoading(false);
     }
@@ -158,7 +146,7 @@ export default function LoginPage() {
               {isSignUp ? 'Apply for License' : 'Secure Access'}
             </CardTitle>
             <CardDescription>
-              {isSignUp ? 'Builder or Faculty registration for the strategic lab.' : 'Enter your credentials to enter the lab.'}
+              {isSignUp ? 'Registration for the institutional lab.' : 'Enter your credentials to enter the lab.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -167,7 +155,7 @@ export default function LoginPage() {
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div className="text-xs font-medium">
                   <p className="font-bold uppercase tracking-wider mb-1">Waitlist Active</p>
-                  Institutional capacity reached. Contact the Builder for more licenses.
+                  Institutional capacity reached. Contact the administrator for more licenses.
                 </div>
               </div>
             )}
@@ -205,7 +193,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="name@themogulfactory.co" 
+                  placeholder="name@university.edu" 
                   className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                 />
               </div>
@@ -242,12 +230,12 @@ export default function LoginPage() {
               <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 border-t border-muted pt-6">
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${licensesRemaining > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
-                  {licenseLoading ? 'Syncing...' : `${licensesRemaining} Faculty Slots Left`}
+                  {licenseLoading ? 'Syncing...' : `${licensesRemaining} Slots Available`}
                 </div>
                 <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Strike Team Secured
+                  Secure Access
                 </div>
               </div>
             </div>

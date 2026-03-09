@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { User, ShieldCheck, Mail, Calendar, Key, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, Key, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from 'firebase/auth';
 
@@ -35,19 +35,17 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
-      // Update Auth Profile
       await updateProfile(user, {
         displayName: `${formData.firstName} ${formData.lastName}`
       });
 
-      // Update Firestore
       await updateDoc(doc(db, 'userProfiles', user.uid), {
         firstName: formData.firstName,
         lastName: formData.lastName,
         updatedAt: new Date().toISOString()
       });
 
-      toast({ title: "Profile Updated", description: "Your account details have been successfully synchronized." });
+      toast({ title: "Profile Updated", description: "Your account details have been saved." });
     } catch (err) {
       toast({ variant: "destructive", title: "Update Failed", description: "There was an error saving your changes." });
     } finally {
@@ -96,7 +94,6 @@ export default function ProfilePage() {
                     disabled 
                     className="h-12 rounded-xl bg-muted/20 border-none opacity-60 cursor-not-allowed" 
                   />
-                  <p className="text-[9px] text-muted-foreground font-medium italic">Institutional emails are managed by the system administrator.</p>
                 </div>
                 <Button 
                   type="submit" 
@@ -116,9 +113,9 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-4">
-              <p className="text-sm text-muted-foreground font-medium">Password resets are handled via FAMU institutional security protocols.</p>
+              <p className="text-sm text-muted-foreground font-medium">Password resets are managed via institutional security protocols.</p>
               <Button variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
-                Reset Password via Email
+                Reset Password
               </Button>
             </CardContent>
           </Card>
