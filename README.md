@@ -6,14 +6,14 @@ This laboratory empowers Florida A&M University faculty with strategic AI litera
 
 To launch this project, you must first push your code from this environment to your GitHub account.
 
-### 1. Open the Terminal
-If you don't see a terminal window at the bottom of your screen:
+### 1. Open the CORRECT Terminal
+Do NOT use the terminal on your Mac computer. Use the one inside this browser window:
 - **Shortcut (Mac)**: Press `Command` + `J`
 - **Shortcut (Windows/Linux)**: Press `Control` + `J`
-- **Manual**: Look at the very top menu bar in your browser window (within the app UI, not the browser's own menu) for **View > Terminal**.
+- **Manual**: Look at the menu at the very top of this window for **View > Terminal**.
 
 ### 2. Run these commands
-Copy and paste each line into the terminal and press **Enter** after each one. 
+Copy and paste each line into the terminal at the bottom of your screen and press **Enter** after each one. 
 
 ```bash
 git init
