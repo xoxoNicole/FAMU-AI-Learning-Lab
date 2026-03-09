@@ -76,7 +76,7 @@ export function Sidebar() {
           <div className="flex flex-col">
             <span className="text-xl font-headline font-bold text-[#004B40] tracking-tighter block leading-none">AI Learning Lab</span>
             <span className="text-[8px] font-bold text-[#FF671F] uppercase tracking-[0.1em] mt-1">FLORIDA A & M UNIVERSITY</span>
-            <span className="text-[7px] font-bold text-brand-pink uppercase tracking-widest mt-0.5">POWERED BY THE AI ACADEMY</span>
+            <span className="text-[7px] font-bold text-brand-pink uppercase tracking-widest mt-0.5">POWERED BY THE AI ACADEMY AT MOGUL SCHOOL</span>
           </div>
         </div>
       </div>
