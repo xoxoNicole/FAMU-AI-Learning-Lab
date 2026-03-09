@@ -4,19 +4,8 @@ This laboratory empowers Florida A&M University faculty with strategic AI litera
 
 ## 🚀 Deployment Instructions
 
-To launch this project, you must push your code from this environment to your GitHub account.
-
-### 1. Switch to CODE VIEW
-In the top right corner of this screen (near the blue **Publish** button), click the **`</>`** icon to switch from the preview to the code editor.
-
-### 2. Open the CORRECT Terminal
-Once you are in the code view, open the terminal at the bottom of the screen:
-- **Shortcut (Mac)**: Press `Command` + `J`
-- **Shortcut (Windows/Linux)**: Press `Control` + `J`
-- **Manual**: Click the **Hamburger Menu (three lines)** in the top-left corner, then select **Terminal** > **New Terminal**.
-
-### 3. Run these commands
-Copy and paste each line into the terminal at the bottom of your screen and press **Enter** after each one. 
+### 1. Push Code to GitHub
+Ensure you have run the following commands in the IDX Terminal (`Command + J`):
 
 ```bash
 git init
@@ -27,11 +16,22 @@ git remote add origin https://github.com/xoxoNicole/FAMU-AI-Learning-Lab.git
 git push -u origin main
 ```
 
-### 4. Firebase Console Configuration
-When prompted in the Firebase Console:
+### 2. Firebase Console Configuration
+In the Firebase Console "App Hosting" setup:
 - **Live branch**: Type `main`
 - **App root directory**: Type `/`
 - **Backend ID**: Type `famu-ai-literacy-lab`
+
+### 3. 🔐 Security & API Keys
+Your Firebase configuration in `src/firebase/config.ts` is **public by design**. It is safe to keep in GitHub because security is enforced by **Firebase Security Rules**.
+
+**CRITICAL**: Your AI API Keys (like Gemini) are **private**.
+1. Once the deployment finishes, go to the **App Hosting** dashboard in the Firebase Console.
+2. Go to **Settings** > **Environment variables**.
+3. Add a new variable:
+   - **Key**: `GOOGLE_GENAI_API_KEY`
+   - **Value**: Your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+4. Select **Secret** as the type to ensure it is encrypted and not visible in logs.
 
 ## 🛠 Tech Stack
 - **AI**: Genkit with Vertex AI (Gemini 1.5 Pro)
