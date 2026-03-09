@@ -13,7 +13,7 @@ In the top right corner of this screen (near the blue **Publish** button), click
 Once you are in the code view, open the terminal at the bottom of the screen:
 - **Shortcut (Mac)**: Press `Command` + `J`
 - **Shortcut (Windows/Linux)**: Press `Control` + `J`
-- **Manual**: Click the **Terminal** tab at the very bottom of the editor.
+- **Manual**: Click the **Hamburger Menu (three lines)** in the top-left corner, then select **Terminal** > **New Terminal**.
 
 ### 3. Run these commands
 Copy and paste each line into the terminal at the bottom of your screen and press **Enter** after each one. 
