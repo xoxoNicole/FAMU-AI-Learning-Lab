@@ -42,12 +42,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && !loading) {
+      // Redirect as soon as we have a user, regardless of local loading state
+      if (user) {
         router.replace('/dashboard');
       }
     });
     return () => unsubscribe();
-  }, [auth, router, loading]);
+  }, [auth, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +108,7 @@ export default function LoginPage() {
 
         toast({ 
           title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
-          description: "Your institutional access is active." 
+          description: "Your institutional access is active. Redirecting..." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
