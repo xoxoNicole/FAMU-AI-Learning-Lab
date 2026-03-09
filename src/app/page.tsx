@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -12,14 +13,15 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background selection:bg-accent/30 overflow-x-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-muted">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#004B40] flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#004B40] flex items-center justify-center shadow-lg">
+              <Sparkles className="w-7 h-7 text-white" />
             </div>
-            <div>
-              <span className="text-xl font-headline font-bold text-[#004B40] tracking-tight block leading-none">AI Literacy Lab</span>
-              <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.2em]">Florida A&M University</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-headline font-bold text-[#004B40] tracking-tight block leading-none">AI Learning Lab</span>
+              <span className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.1em] mt-1">FLORIDA A & M UNIVERSITY</span>
+              <span className="text-[8px] font-bold text-brand-pink uppercase tracking-widest mt-0.5">POWERED BY THE AI ACADEMY AT MOGUL SCHOOL</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -36,7 +38,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-20 px-6">
+      <section className="relative pt-48 pb-20 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 relative z-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#004B40]/5 border border-[#004B40]/10">
@@ -133,9 +135,9 @@ export default function LandingPage() {
               <div className="w-16 h-16 rounded-full border-4 border-[#004B40]/10 flex items-center justify-center">
                 <ShieldCheck className="w-8 h-8 text-[#004B40]" />
               </div>
-              <div>
-                <p className="font-headline font-bold text-[#004B40] text-lg uppercase tracking-tight">Institutional Standard</p>
-                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">Enterprise Data Privacy and Security</p>
+              <div className="flex flex-col">
+                <p className="font-headline font-bold text-[#004B40] text-lg uppercase tracking-tight leading-none">AI Learning Lab</p>
+                <p className="text-brand-pink text-[10px] font-bold uppercase tracking-widest mt-1">POWERED BY THE AI ACADEMY AT MOGUL SCHOOL</p>
               </div>
             </div>
             <div className="flex gap-12 font-headline font-bold text-[#004B40]/40 text-sm uppercase tracking-[0.3em]">

@@ -14,6 +14,9 @@
     --accent: 19 100% 56%;
     --accent-foreground: 0 0% 100%;
 
+    /* Agency Branding */
+    --brand-pink: 327 100% 50%;
+
     /* Theme Layout */
     --background: 0 0% 98%;
     --foreground: 171 100% 5%;
@@ -63,4 +66,8 @@
 
 .famu-orange-button {
   @apply bg-[#FF671F] text-white hover:bg-[#FF671F]/90 transition-colors;
+}
+
+.text-brand-pink {
+  color: hsl(var(--brand-pink));
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -42,7 +43,6 @@ export default function LoginPage() {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && !loading) {
-        // Use replace for a smoother, one-way transition
         router.replace('/dashboard');
       }
     });
@@ -138,11 +138,12 @@ export default function LoginPage() {
 
       <div className="z-10 w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3">
-            <Sparkles className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-[#FF671F] shadow-2xl mb-6 transform -rotate-3">
+            <Sparkles className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter">AI Literacy Lab</h1>
-          <p className="text-white/70 font-body text-sm uppercase tracking-widest font-bold">Florida A&M University</p>
+          <h1 className="text-4xl font-headline font-bold text-white mb-2 tracking-tighter">AI Learning Lab</h1>
+          <p className="text-white/70 font-body text-[10px] uppercase tracking-[0.2em] font-bold">FLORIDA A & M UNIVERSITY</p>
+          <p className="text-brand-pink font-body text-[8px] uppercase tracking-widest font-bold mt-2">POWERED BY THE AI ACADEMY AT MOGUL SCHOOL</p>
         </div>
 
         <Card className="border-none shadow-2xl overflow-hidden rounded-[2.5rem] bg-white">

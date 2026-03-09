@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -72,9 +73,10 @@ export function Sidebar() {
           <div className="w-10 h-10 rounded-xl bg-[#004B40] flex items-center justify-center shadow-lg transform -rotate-3">
             <Sparkles className="w-6 h-6 text-[#FF671F]" />
           </div>
-          <div>
-            <span className="text-xl font-headline font-bold text-[#004B40] tracking-tighter block leading-none">AI Lab</span>
-            <span className="text-[9px] font-bold text-[#FF671F] uppercase tracking-[0.2em]">Florida A&M</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-headline font-bold text-[#004B40] tracking-tighter block leading-none">AI Learning Lab</span>
+            <span className="text-[8px] font-bold text-[#FF671F] uppercase tracking-[0.1em] mt-1">FLORIDA A & M UNIVERSITY</span>
+            <span className="text-[7px] font-bold text-brand-pink uppercase tracking-widest mt-0.5">POWERED BY THE AI ACADEMY</span>
           </div>
         </div>
       </div>
