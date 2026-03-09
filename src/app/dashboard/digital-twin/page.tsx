@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Sparkles, 
-  UserCheck, 
   Globe, 
   ShieldCheck, 
   Loader2, 
@@ -47,7 +46,7 @@ export default function DigitalTwinLab() {
         {isAdmin && (
           <Link href="/dashboard/admin/maintenance">
             <Button variant="outline" className="rounded-xl border-[#004B40]/10 text-[#004B40] font-bold h-12">
-              <Settings className="w-4 h-4 mr-2" /> Antigravity Maintenance
+              <Settings className="w-4 h-4 mr-2" /> Institutional Maintenance
             </Button>
           </Link>
         )}
@@ -128,7 +127,7 @@ export default function DigitalTwinLab() {
               <Shield className="w-5 h-5 text-[#FF671F] fill-[#FF671F]" /> Enterprise Trust
             </h3>
             <p className="text-white/80 text-sm font-medium leading-relaxed mb-8 relative z-10">
-              The Digital Twin is an extension of Nicole's strategic brain. By grounding the model in proprietary FAMU IP, we ensure every interaction is anchored in institutional excellence and technological sovereignty.
+              The Digital Twin is an extension of Nicole's strategic framework. By grounding the model in proprietary FAMU IP, we ensure every interaction is anchored in institutional excellence.
             </p>
             <Button variant="outline" className="w-full rounded-xl border-white/20 text-white hover:bg-white/10 font-bold h-12">
               View Bio
@@ -145,7 +144,7 @@ export default function DigitalTwinLab() {
                 "Vocal Cloning Synchronization", 
                 "Institutional Memo Synthesis", 
                 "RAG-Grounded AI Ethics",
-                "CEO Strategic Audit"
+                "Strategic Performance Audit"
               ].map((area, i) => (
                 <li key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-[#004B40]/5 transition-colors group">
                   <span className="w-2 h-2 rounded-full bg-[#FF671F] mt-2 shrink-0" />

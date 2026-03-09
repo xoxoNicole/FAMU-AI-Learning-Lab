@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { askNicole } from '@/ai/flows/nicole-mentorship';
 
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Digital Nicole API Error:', error);
     return NextResponse.json(
-      { error: 'Nicole is temporarily unavailable. Let\'s take a deep breath and try again.' },
+      { error: 'Nicole is temporarily unavailable. Please try again later.' },
       { status: 500 }
     );
   }

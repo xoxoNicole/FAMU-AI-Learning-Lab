@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -30,8 +29,8 @@ export default function MaintenanceDashboard() {
       <header className="flex justify-between items-end">
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-[#FF671F] uppercase tracking-[0.3em]">Institutional Audit</p>
-          <h1 className="text-4xl font-headline font-bold text-[#004B40]">Antigravity Maintenance</h1>
-          <p className="text-muted-foreground font-medium">Refining Nicole's strategic persona based on faculty feedback loops.</p>
+          <h1 className="text-4xl font-headline font-bold text-[#004B40]">Institutional Maintenance</h1>
+          <p className="text-muted-foreground font-medium">Monitoring AI mentor responses and faculty feedback loops.</p>
         </div>
       </header>
 
@@ -41,7 +40,7 @@ export default function MaintenanceDashboard() {
           <p className="text-3xl font-headline font-bold text-[#004B40]">{stats.total}</p>
         </Card>
         <Card className="bg-green-50 p-6 rounded-[2.5rem] border border-green-100">
-          <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-2">Visionary (Pass)</p>
+          <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-2">Success (Pass)</p>
           <p className="text-3xl font-headline font-bold text-green-700">{stats.positive}</p>
         </Card>
         <Card className="bg-red-50 p-6 rounded-[2.5rem] border border-red-100">
@@ -85,7 +84,7 @@ export default function MaintenanceDashboard() {
                     </div>
                     <div className="space-y-2">
                       <p className="text-xs font-bold text-[#004B40] uppercase tracking-wider flex items-center gap-2">
-                        <ShieldAlert className="w-3 h-3 text-[#FF671F]" /> Nicole's Response
+                        <ShieldAlert className="w-3 h-3 text-[#FF671F]" /> Response Provided
                       </p>
                       <p className="text-sm text-[#004B40] font-medium leading-relaxed">{item.response}</p>
                     </div>
@@ -96,7 +95,7 @@ export default function MaintenanceDashboard() {
           </div>
         ) : (
           <Card className="border-dashed border-2 p-20 text-center rounded-[2.5rem] bg-transparent">
-            <p className="text-muted-foreground italic">No feedback has been recorded yet. The laboratory is operating in optimal silence.</p>
+            <p className="text-muted-foreground italic">No feedback has been recorded yet.</p>
           </Card>
         )}
       </div>

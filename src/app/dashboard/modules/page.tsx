@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -160,7 +159,7 @@ export default function ModulesListing() {
             </div>
             <div className="space-y-2">
               <h3 className="text-3xl font-headline font-bold text-[#004B40]">Initializing Curriculum</h3>
-              <p className="text-muted-foreground font-medium">Nicole is currently indexing the proprietary FAMU strategic modules. Take a deep breath—your learning journey will begin shortly.</p>
+              <p className="text-muted-foreground font-medium">The proprietary FAMU strategic modules are currently being indexed. Your learning journey will begin shortly.</p>
             </div>
             {isAdmin && (
               <Link href="/dashboard/curriculum-manager">
