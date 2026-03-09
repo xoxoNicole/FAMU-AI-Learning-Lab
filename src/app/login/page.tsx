@@ -22,7 +22,6 @@ export default function LoginPage() {
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -35,11 +34,10 @@ export default function LoginPage() {
 
   // Global redirect: if user is authenticated, move to dashboard immediately
   useEffect(() => {
-    if (user && !isUserLoading) {
-      setSuccess(true);
-      router.replace('/dashboard');
+    if (user) {
+      router.push('/dashboard');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, router]);
 
   const licenseRef = useMemoFirebase(() => {
     if (!db) return null;
@@ -96,25 +94,18 @@ export default function LoginPage() {
             activeLicenses: increment(1),
             updatedAt: new Date().toISOString()
           }, { merge: true });
-        } else if (isBuilderDomain && !licenseConfig) {
-          setDocumentNonBlocking(doc(db, 'system', 'license'), {
-            totalLicenses: 3,
-            activeLicenses: 0,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
         }
 
         toast({ 
-          title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
-          description: "Your institutional access is active. Redirecting..." 
+          title: "Account Created", 
+          description: "Redirecting to your dashboard..." 
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
       
-      setSuccess(true);
       // Explicit navigation for speed
-      router.replace('/dashboard');
+      router.push('/dashboard');
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -128,17 +119,12 @@ export default function LoginPage() {
   const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
 
   // Don't show the login form if we're already authenticated
-  if (user && success) {
+  if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#004B40]">
         <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="w-12 h-12 animate-spin text-white mx-auto opacity-20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Check className="w-6 h-6 text-[#FF671F]" />
-            </div>
-          </div>
-          <p className="text-[10px] font-bold text-white uppercase tracking-[0.3em] animate-pulse">Entering Lab Workspace...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-white mx-auto opacity-20" />
+          <p className="text-[10px] font-bold text-white uppercase tracking-[0.3em] animate-pulse">Entering Workspace...</p>
         </div>
       </div>
     );
@@ -238,10 +224,10 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                disabled={loading || success || (isSignUp && licensesRemaining <= 0 && !email.toLowerCase().endsWith('@themogulfactory.co') && (licenseConfig?.totalLicenses ?? 0) > 0)}
+                disabled={loading}
                 className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : success ? <Check className="w-6 h-6" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : isSignUp ? <><UserPlus className="w-5 h-5 mr-2" /> Register</> : <><LogIn className="w-5 h-5 mr-2" /> Secure Sign In</>}
               </Button>
             </form>
 

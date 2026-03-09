@@ -21,9 +21,9 @@ export default function DashboardLayout({
 
   // Protect dashboard routes: Redirect to login if not authenticated
   useEffect(() => {
-    // Only redirect if we are certain the user is not logged in
+    // Only redirect if we are certain the user is not logged in after initialization
     if (!isUserLoading && !user) {
-      router.replace('/login');
+      router.push('/login');
     }
   }, [user, isUserLoading, router]);
 
@@ -31,9 +31,9 @@ export default function DashboardLayout({
   const pathParts = pathname.split('/').filter(Boolean);
   const isHome = pathname === '/dashboard';
 
-  // If we are loading the user AND we don't have a user object yet, show a consistent loader.
-  // If we have a user object, we can proceed even if the initial "loading" state is true
-  // to prevent a flickering white screen or "forever spinning" during transitions.
+  // Optimized Loading Logic:
+  // If we have a user, show the dashboard immediately even if the loading state is still settling.
+  // This removes the flickering white screen and the "forever spinning" feel.
   if (isUserLoading && !user) {
     return (
       <div className="h-svh w-screen flex items-center justify-center bg-background">
@@ -44,13 +44,13 @@ export default function DashboardLayout({
               <div className="w-2 h-2 bg-[#FF671F] rounded-full animate-pulse" />
             </div>
           </div>
-          <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-[0.3em] animate-pulse">Initializing Lab Session...</p>
+          <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-[0.3em] animate-pulse">Handshaking Session...</p>
         </div>
       </div>
     );
   }
 
-  // If not loading and no user, we return null while the redirect happens
+  // If we don't have a user and we're not loading, return null while the protected route logic kicks in
   if (!user) {
     return null;
   }
