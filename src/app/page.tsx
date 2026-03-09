@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, ArrowRight, Zap, BookOpen, Target, Sparkles } from 'lucide-react';
+import { ShieldCheck, ArrowRight, BookOpen, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
@@ -48,7 +48,7 @@ export default function LandingPage() {
               <span className="text-[#FF671F]">Excellence.</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-lg font-medium">
-              A specialized platform empowering academic leaders to refine grant proposals, draft strategic institutional content, and leverage AI with confidence.
+              A specialized platform empowering academic leaders to refine grant proposals, draft strategic institutional content, and leverage AI with professional precision.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link href="/login">

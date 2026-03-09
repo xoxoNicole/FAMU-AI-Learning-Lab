@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { Suspense } from 'react';
@@ -12,10 +11,10 @@ export default function StrategistPage() {
       <header className="flex justify-between items-end">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-[#FF671F] font-bold uppercase tracking-widest text-xs">
-            <Sparkles className="w-4 h-4" /> Antigravity Refinement
+            <Sparkles className="w-4 h-4" /> Strategic Drafting
           </div>
-          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">The AI Strategist Lab</h1>
-          <p className="text-xl text-muted-foreground font-medium">Bypass the blank page. Refine your vision. Strike from the top.</p>
+          <h1 className="text-5xl font-headline font-bold text-[#004B40] tracking-tight">AI Strategist Lab</h1>
+          <p className="text-xl text-muted-foreground font-medium">Bypass the blank page and refine your institutional vision with professional precision.</p>
         </div>
       </header>
 
@@ -33,7 +32,7 @@ export default function StrategistPage() {
         <Card className="bg-[#004B40]/5 border-none rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3 text-sm text-[#004B40] font-medium">
             <Info className="w-4 h-4 text-[#FF671F]" />
-            <span>Every generation and refinement is grounded in Nicole's proprietary institutional frameworks.</span>
+            <span>Institutional frameworks are utilized to ensure the accuracy and relevance of generated drafts.</span>
           </CardContent>
         </Card>
       </footer>

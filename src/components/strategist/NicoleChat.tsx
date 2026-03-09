@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -102,10 +101,10 @@ export function NicoleChat() {
     try {
       const res = await generateStrategicContent({ request: input });
       setOutput(res.draft);
-      toast({ title: "Draft Generated", description: "Strategic content is ready for refinement." });
+      toast({ title: "Draft Generated", description: "Strategic content is ready for review." });
       
       if (draftId) {
-        saveRevision(res.draft, "Major re-generation from prompt", true);
+        saveRevision(res.draft, "Generated from new prompt", true);
       }
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to generate content." });
@@ -128,7 +127,7 @@ export function NicoleChat() {
           currentToneSetting: toneValue,
           updatedAt: new Date().toISOString()
         });
-        saveRevision(output, "Manual Save/Checkpoint");
+        saveRevision(output, "Manual Checkpoint");
       } else {
         const title = input.length > 40 ? input.substring(0, 40) + "..." : input || "Untitled Strategic Output";
         const newDocRef = doc(collection(db, 'userProfiles', user.uid, 'outputs'));
@@ -150,16 +149,16 @@ export function NicoleChat() {
         addDocumentNonBlocking(collection(db, 'userProfiles', user.uid, 'outputs', newDocId, 'revisions'), {
           outputId: newDocId,
           content: output,
-          appliedRefinementDescription: "Initial AI Generation",
+          appliedRefinementDescription: "Initial Generation",
           refinementTimestamp: new Date().toISOString(),
           isAISuggested: true
         });
       }
       setSaveSuccess(true);
-      toast({ title: "Output Archived", description: "Successfully saved to your strategic repository." });
+      toast({ title: "Draft Saved", description: "Successfully added to your repository." });
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save output." });
+      toast({ variant: "destructive", title: "Error", description: "Failed to save draft." });
     } finally {
       setSaving(false);
     }
@@ -174,7 +173,7 @@ export function NicoleChat() {
     link.download = `strategic-brief-${new Date().getTime()}.txt`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Strategic Export", description: "Brief has been downloaded as a text file." });
+    toast({ title: "Export Successful", description: "Draft downloaded as a text file." });
   };
 
   const handleChallenge = async () => {
@@ -183,9 +182,9 @@ export function NicoleChat() {
     try {
       const res = await challengeAssumptionsAndFeedback({ draftedContent: output });
       setFeedback(res);
-      toast({ title: "Analysis Complete", description: "Strategic friction identified." });
+      toast({ title: "Analysis Complete", description: "Critical insights identified." });
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to analyze content." });
+      toast({ variant: "destructive", title: "Error", description: "Failed to analyze draft." });
     } finally {
       setLoading(false);
     }
@@ -202,10 +201,10 @@ export function NicoleChat() {
       });
       setOutput(res.refinedContent);
       if (draftId) {
-        saveRevision(res.refinedContent, `AI Refinement: ${toneDescription}`, true);
+        saveRevision(res.refinedContent, `Applied tone adjustment: ${toneDescription}`, true);
       }
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to refine content." });
+      toast({ variant: "destructive", title: "Error", description: "Failed to refine draft." });
     } finally {
       setLoading(false);
     }
@@ -213,7 +212,7 @@ export function NicoleChat() {
 
   const handleRestore = (content: string) => {
     setOutput(content);
-    toast({ title: "Revision Restored", description: "Switched to previous strategic state." });
+    toast({ title: "Revision Restored", description: "Reverted to previous state." });
   };
 
   return (
@@ -225,9 +224,9 @@ export function NicoleChat() {
               <Sparkles className="w-6 h-6 text-[#FF671F]" />
             </div>
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-widest mb-1">Strategic AI Lab</p>
+              <p className="text-[10px] font-bold text-[#004B40] uppercase tracking-widest mb-1">Strategic Drafting Lab</p>
               <p className="text-[#004B40] font-medium leading-relaxed">
-                Describe the strategic output we're building today. "Deep breath," and let's find clarity.
+                Describe the institutional output you wish to generate. We will work together to refine your strategic vision.
               </p>
             </div>
           </div>
@@ -258,13 +257,13 @@ export function NicoleChat() {
               <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-muted">
                 <Button onClick={() => {
                   navigator.clipboard.writeText(output);
-                  toast({ title: "Copied", description: "Strategy copied to clipboard." });
+                  toast({ title: "Copied", description: "Content copied to clipboard." });
                 }} variant="outline" className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold">
                   <Copy className="w-4 h-4 mr-2" /> Copy text
                 </Button>
                 <Button onClick={handleSave} disabled={saving} variant={saveSuccess ? "secondary" : "default"} className={cn("rounded-xl h-12 font-bold px-8 transition-all", saveSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-[#004B40] hover:bg-[#004B40]/90 text-white shadow-xl shadow-green-900/10")}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : saveSuccess ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                  {saveSuccess ? "Archived!" : draftId ? "Save Changes" : "Save to Repository"}
+                  {saveSuccess ? "Saved!" : draftId ? "Save Changes" : "Save to Repository"}
                 </Button>
                 <Button onClick={handleExport} variant="ghost" className="rounded-xl h-12 text-[#004B40] font-bold">
                   <Download className="w-4 h-4 mr-2" /> Export .txt
@@ -276,7 +275,7 @@ export function NicoleChat() {
               <Card className="border-none bg-muted/30 rounded-[2.5rem] p-8 animate-in slide-in-from-right-4">
                 <div className="flex items-center justify-between mb-6">
                   <h4 className="text-lg font-headline font-bold text-[#004B40] flex items-center gap-2">
-                    <History className="w-5 h-5 text-[#FF671F]" /> Antigravity Revision Log
+                    <History className="w-5 h-5 text-[#FF671F]" /> Revision Log
                   </h4>
                   <Button variant="ghost" size="sm" onClick={() => setShowHistory(false)} className="rounded-full h-8 w-8 p-0">
                     <ChevronDown className="w-4 h-4" />
@@ -319,8 +318,8 @@ export function NicoleChat() {
               <FileText className="w-10 h-10 text-[#004B40]" />
             </div>
             <div>
-              <p className="text-xl font-headline font-bold text-[#004B40]">No Strategy Drafted</p>
-              <p className="text-sm font-medium">Use the lab command below to begin your first institutional brief.</p>
+              <p className="text-xl font-headline font-bold text-[#004B40]">No Content Generated</p>
+              <p className="text-sm font-medium">Use the prompt below to begin your first institutional brief.</p>
             </div>
           </div>
         )}
@@ -328,11 +327,11 @@ export function NicoleChat() {
         {feedback && (
           <Card className="border-none bg-[#FF671F]/5 rounded-[2.5rem] p-8 animate-in zoom-in-95 border border-[#FF671F]/10">
             <h4 className="text-xl font-headline font-bold text-[#FF671F] mb-6 flex items-center gap-2">
-              <Lightbulb className="w-6 h-6" /> Strategic Friction Points
+              <Lightbulb className="w-6 h-6" /> Strategic Review
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Structural Weaknesses</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF671F]">Critical Feedback</p>
                 <div className="text-[#004B40] text-sm font-medium leading-relaxed bg-white/50 p-4 rounded-2xl border border-[#FF671F]/10 italic">
                   {feedback.identifiedWeaknesses}
                 </div>
@@ -386,7 +385,7 @@ export function NicoleChat() {
                 disabled={loading}
                 className="bg-[#FF671F]/10 hover:bg-[#FF671F]/20 text-[#FF671F] rounded-xl font-bold h-12"
               >
-                <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} /> Apply Tone Slider
+                <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} /> Adjust Tone
               </Button>
             </div>
             
@@ -396,7 +395,7 @@ export function NicoleChat() {
                 disabled={loading}
                 className="flex-1 h-14 bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10"
               >
-                <ArrowRightLeft className="w-5 h-5 mr-2" /> Challenge My Assumptions
+                <ArrowRightLeft className="w-5 h-5 mr-2" /> Critical Review
               </Button>
             </div>
           </div>
