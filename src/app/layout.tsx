@@ -1,12 +1,11 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'AI Literacy Lab | Mogul School AI',
-  description: 'A personal strategist and mentor for college administrators.',
+  title: 'AI Literacy Lab | Faculty Portal',
+  description: 'Strategic AI education and administrative drafting for institutional leadership.',
 };
 
 export default function RootLayout({
