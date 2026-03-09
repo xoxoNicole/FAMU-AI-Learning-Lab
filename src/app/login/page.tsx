@@ -7,17 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ShieldCheck, Sparkles, UserPlus, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useAuth, useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc, increment } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
-import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
   const db = useFirestore();
   const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,23 +33,19 @@ export default function LoginPage() {
     router.prefetch('/dashboard/modules');
   }, [router]);
 
+  // Global redirect: if user is authenticated, move to dashboard immediately
+  useEffect(() => {
+    if (user && !isUserLoading) {
+      router.replace('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
   const licenseRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'system', 'license');
   }, [db]);
 
   const { data: licenseConfig, isLoading: licenseLoading } = useDoc(licenseRef);
-
-  useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Redirect as soon as we have a user, regardless of local loading state
-      if (user) {
-        router.replace('/dashboard');
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,17 +72,17 @@ export default function LoginPage() {
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const newUser = userCredential.user;
 
-        await updateProfile(user, {
+        await updateProfile(newUser, {
           displayName: `${firstName} ${lastName}`
         });
 
         const role = isBuilderDomain ? 'admin' : 'faculty';
 
-        setDocumentNonBlocking(doc(db, 'userProfiles', user.uid), {
-          id: user.uid,
-          email: user.email,
+        setDocumentNonBlocking(doc(db, 'userProfiles', newUser.uid), {
+          id: newUser.uid,
+          email: newUser.email,
           firstName,
           lastName,
           role: role,
@@ -110,8 +107,10 @@ export default function LoginPage() {
           title: role === 'admin' ? "Builder Access Granted" : "Account Created", 
           description: "Your institutional access is active. Redirecting..." 
         });
+        // Success: the global useEffect will handle the final redirect to /dashboard
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        // Success: the global useEffect will handle the final redirect to /dashboard
       }
     } catch (err: any) {
       toast({
@@ -124,6 +123,18 @@ export default function LoginPage() {
   };
 
   const licensesRemaining = licenseConfig ? Math.max(0, licenseConfig.totalLicenses - licenseConfig.activeLicenses) : 3;
+
+  // Don't show the login form if we're already redirecting
+  if (user && !isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#004B40]">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-white mx-auto opacity-20" />
+          <p className="text-[10px] font-bold text-white uppercase tracking-[0.3em] animate-pulse">Entering Lab...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#004B40] relative overflow-hidden p-6">
