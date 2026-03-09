@@ -20,11 +20,11 @@ Your AI features (Nicole, Drafting, etc.) will not work until you add your priva
 ### 2. 🌐 DNS Configuration (GoDaddy) - VERIFIED
 You have already added the following records to GoDaddy:
 
-| Type | Name (Host) | Value (Points to) |
-| :--- | :--- | :--- |
-| **A** | `famu` | `35.219.200.0` |
-| **TXT** | `famu` | `fah-claim=002-02-285f156f-ee4e-4e9a-a36a-7d2c26a8a035` |
-| **CNAME** | `_acme-challenge_rvlyuquknfzxvy4.famu` | `5b0e6eaf-d5a6-4c3f-a1d5-ecdcf5021ded.6.authorize.certificatemanager.goog.` |
+| Type | Name (Host) | Value (Points to) | Status |
+| :--- | :--- | :--- | :--- |
+| **A** | `famu` | `35.219.200.0` | Pending Verification |
+| **TXT** | `famu` | `fah-claim=002-02-285f156f-ee4e-4e9a-a36a-7d2c26a8a035` | Pending Verification |
+| **CNAME** | `_acme-challenge_rvlyuquknfzxvy4.famu` | `5b0e6eaf-d5a6-4c3f-a1d5-ecdcf5021ded.6.authorize.certificatemanager.goog.` | **✅ VERIFIED** |
 
 **IMPORTANT**: Ensure the old CNAME for `famu` (pointing to `studio-`) is **REMOVED** from GoDaddy.
 
