@@ -6,20 +6,22 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { ShieldCheck, Key, Loader2, Eye, EyeOff } from 'lucide-react';
+import { ShieldCheck, Key, Loader2, Eye, EyeOff, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 
 export default function ProfilePage() {
   const { user } = useUser();
   const db = useFirestore();
+  const auth = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [pwDialogOpen, setPwDialogOpen] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -46,15 +48,46 @@ export default function ProfilePage() {
       setPwDialogOpen(false);
       setPwForm({ current: '', next: '', confirm: '' });
     } catch (err: any) {
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setPwError('Current password is incorrect.');
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
+        setPwError('Current password is incorrect. If you do not remember it, use "Send Reset Email" below.');
       } else if (err.code === 'auth/too-many-requests') {
-        setPwError('Too many attempts. Please try again later.');
+        setPwError('Too many attempts. Please wait a few minutes, or use "Send Reset Email" below.');
+      } else if (err.code === 'auth/requires-recent-login') {
+        setPwError('For security, please sign out and sign back in, then try again.');
+      } else if (err.code === 'auth/weak-password') {
+        setPwError('New password is too weak. Please choose a stronger password.');
+      } else if (err.code === 'auth/user-mismatch' || err.code === 'auth/user-not-found') {
+        setPwError('Unable to verify this account. Try "Send Reset Email" below.');
       } else {
-        setPwError('Something went wrong. Please try again.');
+        setPwError(err?.message ? `Error: ${err.message}` : 'Something went wrong. Please try again.');
       }
     } finally {
       setPwLoading(false);
+    }
+  };
+
+  const handleSendResetEmail = async () => {
+    if (!auth || !user?.email) {
+      toast({ variant: "destructive", title: "No Email On Account", description: "A password reset email requires an email address on file." });
+      return;
+    }
+    setResetLoading(true);
+    setPwError('');
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      toast({
+        title: "Reset Email Sent",
+        description: `Check ${user.email} for a link to reset your password.`
+      });
+      setPwDialogOpen(false);
+    } catch (err: any) {
+      if (err.code === 'auth/too-many-requests') {
+        setPwError('Too many requests. Please wait a few minutes before trying again.');
+      } else {
+        setPwError(err?.message ? `Error: ${err.message}` : 'Could not send reset email. Please try again.');
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -154,14 +187,25 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-4">
-              <p className="text-sm text-muted-foreground font-medium">Update your password at any time. You will need your current password to make changes.</p>
-              <Button
-                variant="outline"
-                onClick={() => { setPwError(''); setPwForm({ current: '', next: '', confirm: '' }); setPwDialogOpen(true); }}
-                className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold"
-              >
-                Change Password
-              </Button>
+              <p className="text-sm text-muted-foreground font-medium">Update your password at any time. If you don't remember your current password, you can request a reset email instead.</p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => { setPwError(''); setPwForm({ current: '', next: '', confirm: '' }); setPwDialogOpen(true); }}
+                  className="rounded-xl h-12 border-[#004B40]/10 text-[#004B40] font-bold"
+                >
+                  Change Password
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleSendResetEmail}
+                  disabled={resetLoading || !user?.email}
+                  className="rounded-xl h-12 text-[#004B40] font-bold hover:bg-[#004B40]/5"
+                >
+                  {resetLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2 text-[#FF671F]" />}
+                  Send Reset Email
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -218,6 +262,16 @@ export default function ProfilePage() {
                 </div>
               </div>
               {pwError && <p className="text-sm text-destructive font-medium">{pwError}</p>}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleSendResetEmail}
+                  disabled={resetLoading || !user?.email}
+                  className="text-xs font-bold text-[#004B40] hover:text-[#FF671F] underline underline-offset-2 disabled:opacity-50"
+                >
+                  {resetLoading ? 'Sending reset email...' : 'Forgot current password? Send reset email'}
+                </button>
+              </div>
               <DialogFooter className="pt-2">
                 <Button type="button" variant="ghost" onClick={() => setPwDialogOpen(false)} className="rounded-xl">Cancel</Button>
                 <Button

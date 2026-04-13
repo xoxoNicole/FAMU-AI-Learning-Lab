@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { NicoleChat } from '@/components/strategist/NicoleChat';
 import { ChevronLeft, Play, CheckCircle, Loader2, Sparkles, BookOpen, LayoutGrid } from 'lucide-react';
 import { useFirestore, useDoc, useUser } from '@/firebase';
