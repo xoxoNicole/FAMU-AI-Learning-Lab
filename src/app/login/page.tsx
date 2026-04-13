@@ -11,7 +11,7 @@ import { useAuth, useFirestore, useDoc, useMemoFirebase, useUser } from '@/fireb
 import { doc, increment } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,10 +22,55 @@ export default function LoginPage() {
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+
+  const handleForgotPassword = async () => {
+    if (!auth) return;
+    const trimmed = email.trim();
+    if (!trimmed) {
+      toast({
+        variant: "destructive",
+        title: "Enter your email first",
+        description: "Type your email in the field above, then click 'Forgot password?' again."
+      });
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, trimmed);
+      toast({
+        title: "Reset Email Sent",
+        description: `Check ${trimmed} for a link to reset your password. It may take a minute to arrive.`
+      });
+    } catch (err: any) {
+      if (err.code === 'auth/too-many-requests') {
+        toast({
+          variant: "destructive",
+          title: "Too Many Requests",
+          description: "Please wait a few minutes before trying again."
+        });
+      } else if (err.code === 'auth/invalid-email') {
+        toast({
+          variant: "destructive",
+          title: "Invalid Email",
+          description: "That doesn't look like a valid email address."
+        });
+      } else {
+        // For security, Firebase may not reveal whether an account exists.
+        // Show a generic success-ish message in most cases.
+        toast({
+          title: "Reset Email Sent",
+          description: `If an account exists for ${trimmed}, a reset link is on its way.`
+        });
+      }
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   // Prefetch dashboard for instant transition
   useEffect(() => {
@@ -227,19 +272,31 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Password</label>
-                <input 
-                  type="password" 
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Password</label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={resetLoading}
+                      className="text-[10px] font-bold uppercase tracking-widest text-[#004B40] hover:text-[#FF671F] underline underline-offset-2 disabled:opacity-50"
+                    >
+                      {resetLoading ? 'Sending...' : 'Forgot password?'}
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="password"
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
                   className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                 />
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full h-14 text-lg bg-[#FF671F] hover:bg-[#FF671F]/90 text-white rounded-2xl font-headline font-bold shadow-xl shadow-orange-900/10 mt-4"
               >
