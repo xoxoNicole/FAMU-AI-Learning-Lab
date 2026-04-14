@@ -236,12 +236,15 @@ export default function CurriculumManager() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase text-[#004B40]/60 tracking-widest">Resource Link (Video)</label>
-                  <input 
-                    value={formData.videoUrl} 
+                  <input
+                    value={formData.videoUrl}
                     onChange={e => setFormData({...formData, videoUrl: e.target.value})}
-                    placeholder="YouTube or Vimeo URL"
+                    placeholder="Paste share URL — Vimeo, YouTube, Loom, or Drive"
                     className="w-full flex h-12 rounded-xl bg-muted/30 border-none px-4 text-sm focus:ring-2 focus:ring-[#FF671F] outline-none"
                   />
+                  <p className="text-[10px] text-muted-foreground">
+                    Paste any share URL — manage/admin URLs also work. Auto-converts to the embed format on play.
+                  </p>
                 </div>
               </div>
 

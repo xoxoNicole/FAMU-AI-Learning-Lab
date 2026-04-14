@@ -12,6 +12,42 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
+/**
+ * Convert common "watch"/"manage" video URLs into their iframe-embed form.
+ * Accepts what you'd copy from a browser bar and returns a URL the iframe
+ * can actually load. If the URL is unrecognized, returns it unchanged.
+ */
+function toEmbedUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+
+  // Vimeo — handle manage, review, and standard share URLs
+  // e.g. vimeo.com/manage/videos/123, vimeo.com/123, vimeo.com/123/abc (private hash)
+  const vimeoManage = trimmed.match(/vimeo\.com\/manage\/videos\/(\d+)/i);
+  if (vimeoManage) return `https://player.vimeo.com/video/${vimeoManage[1]}`;
+  const vimeoShare = trimmed.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/i);
+  if (vimeoShare) {
+    const id = vimeoShare[1];
+    const hash = vimeoShare[2];
+    return hash ? `https://player.vimeo.com/video/${id}?h=${hash}` : `https://player.vimeo.com/video/${id}`;
+  }
+
+  // YouTube — watch, short, youtu.be
+  const yt = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+
+  // Loom
+  const loom = trimmed.match(/loom\.com\/share\/([A-Za-z0-9]+)/i);
+  if (loom) return `https://www.loom.com/embed/${loom[1]}`;
+
+  // Google Drive file
+  const drive = trimmed.match(/drive\.google\.com\/file\/d\/([^\/]+)/i);
+  if (drive) return `https://drive.google.com/file/d/${drive[1]}/preview`;
+
+  // Already an embed URL (player.vimeo.com, youtube.com/embed, etc.) — pass through
+  return trimmed;
+}
+
 export default function ModulePage() {
   const params = useParams();
   const router = useRouter();
@@ -147,10 +183,11 @@ export default function ModulePage() {
                 </div>
               ) : (
                 <iframe
-                  src={module.videoUrl || "https://player.vimeo.com/video/76979871"}
+                  src={toEmbedUrl(module.videoUrl) || "https://player.vimeo.com/video/76979871"}
                   className="absolute inset-0 w-full h-full"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
                   title={module.title}
                 />
               )}
